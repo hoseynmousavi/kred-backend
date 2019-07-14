@@ -1,2 +1,2 @@
 # kred-backend
-this is a really interesting repo for kred.ir backend 
+this is a really interesting repository for kred.ir backend 
