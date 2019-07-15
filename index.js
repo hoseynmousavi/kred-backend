@@ -1,8 +1,8 @@
-const cors = require('cors')
-const express = require('express')
-const bodyParser = require('body-parser')
-const fileUpload = require('express-fileupload')
-const data = require('./Data/data')
+import cors from 'cors'
+import express from 'express'
+import bodyParser from 'body-parser'
+import fileUpload from 'express-fileupload'
+import data from './src/data'
 
 // Normal Things Never Leave Us Alone ...
 const app = express()
@@ -19,8 +19,11 @@ app.use((req, res, next) =>
 })
 
 // Routing Shits
-const Root = require('./Routers/Root')
-app.use('/', Root)
+import rootRouter from './src/routes/rootRouter'
+import userRouter from './src/routes/userRouter'
+
+rootRouter(app)
+userRouter(app)
 
 // Eventually Run The Server
 app.listen(process.env.PORT || data.port, () => console.log(`Kred Backend is Now Running on Port ${data.port}`))

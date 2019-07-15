@@ -1,8 +1,8 @@
 const domain_url = 'https://www.kred.ir/'
 const restful_url = 'https://restful.kred.ir/'
-const port = 1435
+const port = 80
 
-module.exports = {
+export default {
     domain_url,
     restful_url,
     port,
