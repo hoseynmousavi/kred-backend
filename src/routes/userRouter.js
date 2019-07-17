@@ -1,12 +1,15 @@
+import userController from '../controllers/userController'
+
 const userRouter = (app) =>
 {
     app.route('/user')
-        .get((req, res) => res.send('get'))
-        .post((req, res) => res.send('post'))
+        .get(userController.getUsers)
+        .post(userController.addNewUser)
 
-    app.route('/user/:id')
-        .patch((req, res) => res.send('patch'))
-        .delete((req, res) => res.send('delete'))
+    app.route('/user/:userId')
+        .get(userController.getUserById)
+        .patch(userController.updateUserById)
+        .delete(userController.deleteUserById)
 }
 
 export default userRouter
