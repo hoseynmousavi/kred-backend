@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 
 mongoose.Promise = global.Promise
-mongoose.connect(data.connectLocalDb, {useNewUrlParser: true})
+mongoose.connect(data.connectServerDb, {useNewUrlParser: true})
 
 // Add Header To All Responses & Token Things
 addHeaderAndCheckPermissions(app)
