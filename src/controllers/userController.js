@@ -1,12 +1,12 @@
-import mongoose from 'mongoose'
-import userModel from '../models/userModel'
-import tokenHelper from '../functions/tokenHelper'
+import mongoose from "mongoose"
+import userModel from "../models/userModel"
+import tokenHelper from "../functions/tokenHelper"
 
-const user = mongoose.model('user', userModel)
+const user = mongoose.model("user", userModel)
 
 const getUsers = (req, res) =>
 {
-    user.find({}, (err, users) =>
+    user.find({}, {email: 1, email_verified: 1, name: 1, major: 1, birth_date: 1, university: 1, avatar: 1, created_date: 1}, (err, users) =>
     {
         if (err) res.status(400).send(err)
         else res.send(users)
@@ -50,7 +50,7 @@ const userLogin = (req, res) =>
         user.findOne({phone, password}, (err, takenUser) =>
         {
             if (err) res.status(400).send(err)
-            else if (!takenUser) res.status(404).send({message: 'user not found!'})
+            else if (!takenUser) res.status(404).send({message: "user not found!"})
             else
             {
                 const user = takenUser.toJSON()
@@ -60,7 +60,7 @@ const userLogin = (req, res) =>
             }
         })
     }
-    else res.status(400).send({message: 'please send a correct phone!'})
+    else res.status(400).send({message: "please send a correct phone!"})
 }
 
 const updateUserById = (req, res) =>
@@ -74,7 +74,7 @@ const updateUserById = (req, res) =>
             else res.send(updatedUser)
         })
     }
-    else res.status(500).send({message: 'error'})
+    else res.status(500).send({message: "error"})
 }
 
 const deleteUserById = (req, res) =>
@@ -82,7 +82,7 @@ const deleteUserById = (req, res) =>
     user.deleteOne({_id: req.params.userId}, (err) =>
     {
         if (err) res.status(400).send(err)
-        else res.send({message: 'user deleted successfully'})
+        else res.send({message: "user deleted successfully"})
     })
 }
 

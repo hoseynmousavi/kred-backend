@@ -1,16 +1,16 @@
-import userController from '../controllers/userController'
+import userController from "../controllers/userController"
 
 const userRouter = (app) =>
 {
-    app.route('/user')
+    app.route("/user")
         .get(userController.getUsers)
         .post(userController.addNewUser)
         .patch(userController.updateUserById)
 
-    app.route('/user/login')
+    app.route("/user/login")
         .post(userController.userLogin)
 
-    app.route('/user/:userId')
+    app.route("/user/:userId")
         .get(userController.getUserById)
         .delete(userController.deleteUserById)
 }

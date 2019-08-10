@@ -1,6 +1,8 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose"
 
 const model = mongoose.Schema
+
+// const fields = [phone, password, role, email, email_verified, name, major, birth_date, university, avatar, created_date]
 
 const userModel = new model({
     phone: {
@@ -9,18 +11,18 @@ const userModel = new model({
         minlength: 11,
         maxlength: 11,
         index: true,
-        required: 'Enter Phone!',
+        required: "Enter Phone!",
     },
     password: {
         type: String,
         minlength: 6,
         maxlength: 30,
-        required: 'Enter Password!',
+        required: "Enter Password!",
     },
     role: {
         type: String,
-        enum: ['user', 'admin', 'translator'],
-        default: 'user',
+        enum: ["user", "admin", "translator"],
+        default: "user",
     },
     email: {
         type: String,
