@@ -6,10 +6,7 @@ const encodeToken = (payload) =>
     return new Promise((resolve, reject) =>
         jwt.sign(payload, data.sign, {algorithm: 'HS512'}, (err, token) =>
         {
-            if (err)
-            {
-                reject(err)
-            }
+            if (err) reject(err)
             else resolve(token)
         }),
     )

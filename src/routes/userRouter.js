@@ -5,13 +5,13 @@ const userRouter = (app) =>
     app.route('/user')
         .get(userController.getUsers)
         .post(userController.addNewUser)
+        .patch(userController.updateUserById)
 
     app.route('/user/login')
         .post(userController.userLogin)
 
     app.route('/user/:userId')
         .get(userController.getUserById)
-        .patch(userController.updateUserById)
         .delete(userController.deleteUserById)
 }
 
