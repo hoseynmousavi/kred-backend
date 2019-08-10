@@ -8,6 +8,7 @@ import userRouter from './routes/userRouter'
 import datePickerRouter from './routes/datePickerRouter'
 import data from './data'
 import notFoundRooter from './routes/notFoundRouter'
+import addHeaderAndCheckPermissions from './functions/addHeaderAndCheckPermissions'
 
 // Normal Things Never Leave Us Alone ...
 const app = express()
