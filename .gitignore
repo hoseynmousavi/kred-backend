@@ -7,6 +7,9 @@
 /build
 *.zip
 
+# private data
+/src/data
+
 # misc
 /.idea
 

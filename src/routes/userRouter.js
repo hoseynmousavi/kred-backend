@@ -6,6 +6,9 @@ const userRouter = (app) =>
         .get(userController.getUsers)
         .post(userController.addNewUser)
 
+    app.route('/user/login')
+        .post(userController.userLogin)
+
     app.route('/user/:userId')
         .get(userController.getUserById)
         .patch(userController.updateUserById)

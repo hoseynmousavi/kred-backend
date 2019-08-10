@@ -5,7 +5,9 @@ import fileUpload from 'express-fileupload'
 import mongoose from 'mongoose'
 import rootRouter from './routes/rootRouter'
 import userRouter from './routes/userRouter'
+import datePickerRouter from './routes/datePickerRouter'
 import data from './data'
+import notFoundRooter from './routes/notFoundRouter'
 
 // Normal Things Never Leave Us Alone ...
 const app = express()
@@ -15,19 +17,16 @@ app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 
 mongoose.Promise = global.Promise
-// mongoose.connect('mongodb://seyed_hoseyn:HH123456hh@localhost:27017/kred', {useNewUrlParser: true})
-mongoose.connect('mongodb://seyed_hoseyn_kred:HHH123456hhh@188.212.22.166:27017/kred', {useNewUrlParser: true})
+mongoose.connect(data.connectServerDb, {useNewUrlParser: true})
 
-// Add Header To All Responses
-app.use((req, res, next) =>
-{
-    res.setHeader('Access-Control-Allow-Origin', '*')
-    next()
-})
+// Add Header To All Responses & Token Things
+addHeaderAndCheckPermissions(app)
 
 // Routing Shits
 rootRouter(app)
 userRouter(app)
+datePickerRouter(app)
+notFoundRooter(app)
 
 // Eventually Run The Server
 app.listen(data.port, () => console.log(`Kred Backend is Now Running on Port ${data.port}`))
