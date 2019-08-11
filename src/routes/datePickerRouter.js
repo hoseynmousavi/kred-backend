@@ -2,7 +2,7 @@ import JDate from "jalali-date"
 
 const datePickerRouter = (app) =>
 {
-    app.route("/DatePicker")
+    app.route("/datepicker")
         .get((req, res) =>
         {
             const date = new JDate().format("YYYY/MM/DD")
