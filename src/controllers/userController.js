@@ -66,26 +66,12 @@ const userLogin = (req, res) =>
 const updateUserById = (req, res) =>
 {
     // {new: true} means return new data after update
-    if (req.headers.authorization._id)
-    {
-        user.findOneAndUpdate({_id: req.headers.authorization._id}, req.body, {new: true, useFindAndModify: false}, (err, updatedUser) =>
-        {
-            if (err) res.status(400).send(err)
-            else res.send(updatedUser)
-        })
-    }
-    else res.status(500).send({message: "error"})
-}
-
-const deleteUserById = (req, res) =>
-{
-    user.deleteOne({_id: req.params.userId}, (err) =>
+    user.findOneAndUpdate({_id: req.headers.authorization._id}, req.body, {new: true, useFindAndModify: false, runValidators: true}, (err, updatedUser) =>
     {
         if (err) res.status(400).send(err)
-        else res.send({message: "user deleted successfully"})
+        else res.send(updatedUser)
     })
 }
-
 
 const userController = {
     getUsers,
@@ -93,7 +79,6 @@ const userController = {
     getUserById,
     userLogin,
     updateUserById,
-    deleteUserById,
 }
 
 export default userController
