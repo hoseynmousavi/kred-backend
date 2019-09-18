@@ -28,14 +28,23 @@ const exchangeModel = new schema({
         type: String,
         required: "Enter description!",
     },
+    picture: {
+        type: String,
+    },
     city_id: {
         type: schema.Types.ObjectId,
         required: "Enter city_id!",
         ref: "city",
     },
+    category_id: {
+        type: schema.Types.ObjectId,
+        required: "Enter category_id!",
+        ref: "category",
+    },
     user_id: {
         type: schema.Types.ObjectId,
         required: "Enter user_id!",
+        ref: "user",
     },
     is_deleted: {
         type: Boolean,

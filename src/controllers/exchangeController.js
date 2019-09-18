@@ -5,9 +5,9 @@ const exchange = mongoose.model("exchange", exchangeModel)
 
 const getExchanges = (req, res) =>
 {
-    const limit = parseInt(req.query.limit, 10) || 9
-    const skip = (parseInt(req.query.page, 10) || 0) * limit
-    exchange.find({is_deleted: false, is_verified: true}, {title: 1, price: 1, telegram: 1, whatsapp: 1, phone: 1, city_id: 1, description: 1, created_date: 1, user_id: 1}, {skip, limit}, (err, users) =>
+    const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
+    const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
+    exchange.find({is_deleted: false, is_verified: false}, {title: 1, price: 1, telegram: 1, whatsapp: 1, phone: 1, city_id: 1, category_id: 1, description: 1, created_date: 1, user_id: 1, picture: 1}, {skip, limit}, (err, users) =>
     {
         if (err) res.status(400).send(err)
         else res.send(users)
@@ -62,7 +62,7 @@ const deleteExchangeById = (req, res) =>
     exchange.deleteOne({user_id: req.headers.authorization._id, _id: req.body._id}, (err) =>
     {
         if (err) res.status(400).send(err)
-        else res.send({message: "user deleted successfully"})
+        else res.send({message: "exchange deleted successfully"})
     })
 }
 
