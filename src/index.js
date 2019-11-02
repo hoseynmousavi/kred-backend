@@ -12,11 +12,13 @@ import addHeaderAndCheckPermissions from "./functions/addHeaderAndCheckPermissio
 import exchangeRouter from "./routes/exchangeRouter"
 import cityRouter from "./routes/cityRouter"
 import path from "path"
+import categoryRouter from "./routes/categoryRouter"
+import conversationRouter from "./routes/conversationRouter"
 
 // Normal Things Never Leave Us Alone ...
 const app = express()
 app.use(cors())
-app.use(fileUpload({}))
+app.use(fileUpload({createParentPath: true}))
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 
@@ -33,6 +35,8 @@ userRouter(app)
 datePickerRouter(app)
 exchangeRouter(app)
 cityRouter(app)
+categoryRouter(app)
+conversationRouter(app)
 
 app.route("/media/:folder/:file").get((req, res) =>
 {

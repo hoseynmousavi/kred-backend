@@ -7,10 +7,10 @@ const getExchanges = (req, res) =>
 {
     const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
     const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
-    exchange.find({is_deleted: false, is_verified: true}, {title: 1, price: 1, telegram: 1, whatsapp: 1, phone: 1, city_id: 1, category_id: 1, description: 1, created_date: 1, user_id: 1, picture: 1}, {skip, limit}, (err, users) =>
+    exchange.find({is_deleted: false, is_verified: true}, {title: 1, price: 1, telegram: 1, whatsapp: 1, phone: 1, city_id: 1, category_id: 1, description: 1, created_date: 1, user_id: 1, picture: 1}, {sort: "-created_date", skip, limit}, (err, exchanges) =>
     {
         if (err) res.status(400).send(err)
-        else res.send(users)
+        else res.send(exchanges)
     })
 }
 
@@ -19,7 +19,7 @@ const getExchangeById = (req, res) =>
     exchange.findById(req.params.exchangeId, (err, takenExchange) =>
     {
         if (err) res.status(500).send(err)
-        else if (!takenExchange) res.status(404).send({message: "not found!"})
+        else if (!takenExchange || takenExchange.is_deleted || !takenExchange.is_verified) res.status(404).send({message: "not found!"})
         else res.send(takenExchange)
     })
 }
@@ -130,7 +130,7 @@ const deleteExchangeById = (req, res) =>
     })
 }
 
-const userController = {
+const exchangeController = {
     getExchanges,
     updateExchangeById,
     addNewExchange,
@@ -138,4 +138,4 @@ const userController = {
     getExchangeById,
 }
 
-export default userController
+export default exchangeController

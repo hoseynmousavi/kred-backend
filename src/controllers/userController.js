@@ -6,7 +6,7 @@ const user = mongoose.model("user", userModel)
 
 // const getUsers = (req, res) =>
 // {
-//     user.find({}, {email: 1, email_verified: 1, name: 1, major: 1, birth_date: 1, university: 1, avatar: 1, created_date: 1}, (err, users) =>
+//     user.find(null, {email: 1, email_verified: 1, name: 1, major: 1, birth_date: 1, university: 1, avatar: 1, created_date: 1}, (err, users) =>
 //     {
 //         if (err) res.status(400).send(err)
 //         else res.send(users)
@@ -45,14 +45,14 @@ const addNewUser = (req, res) =>
     })
 }
 
-const getUserById = (req, res) =>
-{
-    user.findById(req.params.userId, (err, takenUser) =>
-    {
-        if (err) res.status(500).send(err)
-        else res.send(takenUser)
-    })
-}
+// const getUserById = (req, res) =>
+// {
+//     user.findById(req.params.userId, (err, takenUser) =>
+//     {
+//         if (err) res.status(500).send(err)
+//         else res.send(takenUser)
+//     })
+// }
 
 const userLogin = (req, res) =>
 {
@@ -103,7 +103,7 @@ const updateUserById = (req, res) =>
 const userController = {
     // getUsers,
     addNewUser,
-    getUserById,
+    // getUserById,
     userLogin,
     updateUserById,
     phoneCheck,

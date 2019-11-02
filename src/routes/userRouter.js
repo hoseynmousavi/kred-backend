@@ -10,8 +10,8 @@ const userRouter = (app) =>
     app.route("/user/phone_check")
         .post(userController.phoneCheck)
 
-    app.route("/user/:userId")
-        .get(userController.getUserById)
+    // app.route("/user/:userId")
+    //     .get(userController.getUserById)
 
     app.route("/user/login")
         .post(userController.userLogin)
