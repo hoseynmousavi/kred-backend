@@ -10,5 +10,3 @@ const cityModel = new schema({
 })
 
 export default cityModel
-
-// TODO Hoseyn Create All Cities

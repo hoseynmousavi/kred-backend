@@ -7,10 +7,13 @@ const addHeaderAndCheckPermissions = (app) =>
         res.setHeader("Access-Control-Allow-Origin", "*")
         if (
             (req.originalUrl === "/") ||
-            (req.originalUrl === "/user" && req.method === "POST") ||
-            (req.originalUrl === "/user/login") ||
+            (req.originalUrl === "/user/" && req.method === "POST") ||
+            (req.originalUrl === "/user/phone_check/") ||
+            (req.originalUrl === "/user/login/") ||
+            (req.originalUrl === "/datepicker") ||
             (req.originalUrl.slice(0, 9) === "/exchange" && req.method === "GET") ||
-            (req.originalUrl === "/datepicker")
+            (req.originalUrl.slice(0, 5) === "/city" && req.method === "GET") ||
+            (req.originalUrl.slice(0, 16) === "/media/pictures/" && req.method === "GET")
         )
         {
             next()

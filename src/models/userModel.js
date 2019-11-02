@@ -19,9 +19,8 @@ const userModel = new model({
         maxlength: 30,
         required: "Enter Password!",
     },
-    role: {
+    role: { // user & admin & translator
         type: String,
-        enum: ["user", "admin", "translator"],
         default: "user",
     },
     email: {

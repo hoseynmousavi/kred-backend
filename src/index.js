@@ -9,8 +9,9 @@ import datePickerRouter from "./routes/datePickerRouter"
 import data from "./data"
 import notFoundRooter from "./routes/notFoundRouter"
 import addHeaderAndCheckPermissions from "./functions/addHeaderAndCheckPermissions"
-import mediaRouter from "./routes/mediaRouter"
 import exchangeRouter from "./routes/exchangeRouter"
+import cityRouter from "./routes/cityRouter"
+import path from "path"
 
 // Normal Things Never Leave Us Alone ...
 const app = express()
@@ -31,7 +32,14 @@ rootRouter(app)
 userRouter(app)
 datePickerRouter(app)
 exchangeRouter(app)
-mediaRouter(app)
+cityRouter(app)
+
+app.route("/media/:folder/:file").get((req, res) =>
+{
+    res.setHeader("Cache-Control", "max-age=31536000")
+    res.sendFile(path.join(__dirname, `/media/${req.params.folder}/${req.params.file}`))
+})
+
 notFoundRooter(app) // & at the end
 
 // Eventually Run The Server
