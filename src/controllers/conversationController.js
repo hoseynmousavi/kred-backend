@@ -151,7 +151,9 @@ const addNewComment = (req, res) =>
 
 const getConversationComments = (req, res) =>
 {
-    comment.find({is_deleted: false, conversation_id: req.params.conversationId}, (err, comments) =>
+    const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
+    const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
+    comment.find({is_deleted: false, conversation_id: req.params.conversationId}, null, {sort: "-created_date", skip, limit}, (err, comments) =>
     {
         if (err) res.status(400).send(err)
         else res.send(comments)
