@@ -5,7 +5,7 @@ kred-backend end-points routes:
 
     دسته بندی
     /category
-        get => (limit = 9 , page = 1)
+        get => (limit = 9, page = 1)
 
     /category/:categoryId
         get
@@ -13,12 +13,12 @@ kred-backend end-points routes:
 
     شهر
     /city
-        get => (limit = 9 , page = 1)
+        get => (limit = 9, page = 1)
 
 
     گپ و گفت
     /conversation
-        get => (limit = 9 , page = 1)
+        get => (limit = 9, page = 1)
         post => (title*, description*, picture*, bold_description) sender "should" be admin
 
     /conversation/:conversationId
@@ -35,7 +35,7 @@ kred-backend end-points routes:
         patch => (comment_id, description)
 
     /conversation/comments/:conversationId (getting a conversation comments)
-        get
+        get => (limit = 9, page = 1)
 
     /conversation/comment/:commentId
         delete
@@ -43,7 +43,7 @@ kred-backend end-points routes:
 
     تبادل کتاب
     /exchange
-        get => (limit = 9 , page = 1)
+        get => (limit = 9, page = 1)
         post => (title* : min-length is 1, price*, telegram || whatsapp || phone, description*, picture*, city_id*, categories* : stringify-array)
         patch => (title, price, telegram, whatsapp, phone, description, picture, city_id, categories : stringify-array)
 
@@ -59,4 +59,4 @@ kred-backend end-points routes:
 
 
 
-as everyone expect, this list will be updated due back updates.
+as everyone expects, this list will be updated due back updates.
