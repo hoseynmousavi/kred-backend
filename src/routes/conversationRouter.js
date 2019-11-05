@@ -6,6 +6,9 @@ const conversationRouter = (app) =>
         .get(conversationController.getConversations)
         .post(conversationController.addNewConversation)
 
+    app.route("/conversation/:conversationId")
+        .get(conversationController.getConversationById)
+
     app.route("/conversation/like")
         .post(conversationController.addNewLike)
 
@@ -21,9 +24,6 @@ const conversationRouter = (app) =>
 
     app.route("/conversation/comment/:commentId")
         .delete(conversationController.deleteComment)
-
-    app.route("/conversation/:conversationId")
-        .get(conversationController.getConversationById)
 }
 
 export default conversationRouter

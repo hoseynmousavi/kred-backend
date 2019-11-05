@@ -36,9 +36,9 @@ const exchangeModel = new schema({
         required: "Enter city_id!",
         ref: "city",
     },
-    category_id: {
-        type: schema.Types.ObjectId,
-        required: "Enter category_id!",
+    categories: {
+        type: [schema.Types.ObjectId],
+        required: "Enter categories!",
         ref: "category",
     },
     user_id: {

@@ -7,7 +7,7 @@ const getExchanges = (req, res) =>
 {
     const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
     const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
-    exchange.find({is_deleted: false, is_verified: true}, {title: 1, price: 1, telegram: 1, whatsapp: 1, phone: 1, city_id: 1, category_id: 1, description: 1, created_date: 1, user_id: 1, picture: 1}, {sort: "-created_date", skip, limit}, (err, exchanges) =>
+    exchange.find({is_deleted: false, is_verified: true}, {title: 1, price: 1, telegram: 1, whatsapp: 1, phone: 1, city_id: 1, categories: 1, description: 1, created_date: 1, user_id: 1, picture: 1}, {sort: "-created_date", skip, limit}, (err, exchanges) =>
     {
         if (err) res.status(400).send(err)
         else res.send(exchanges)
@@ -44,10 +44,10 @@ const addNewExchange = (req, res) =>
                 else
                 {
                     delete req.body.created_date
-                    delete req.body.is_verified
                     delete req.body.is_deleted
                     delete req.body.user_id
-                    const newExchange = new exchange({...req.body, picture: `media/pictures/${picName}`, user_id: req.headers.authorization._id})
+                    req.headers.authorization.role === "admin" ? req.body.is_verified = true : delete req.body.is_verified
+                    const newExchange = new exchange({...req.body, categories: JSON.parse(req.body.categories), picture: `media/pictures/${picName}`, user_id: req.headers.authorization._id})
                     newExchange.save((err, createdExchange) =>
                     {
                         if (err)
@@ -60,23 +60,7 @@ const addNewExchange = (req, res) =>
                 }
             })
         }
-        else
-        {
-            delete req.body.created_date
-            delete req.body.is_verified
-            delete req.body.is_deleted
-            delete req.body.user_id
-            const newExchange = new exchange({...req.body, user_id: req.headers.authorization._id})
-            newExchange.save((err, createdExchange) =>
-            {
-                if (err)
-                {
-                    console.log(err)
-                    res.status(400).send(err)
-                }
-                else res.send(createdExchange)
-            })
-        }
+        else res.status(400).send({message: "send picture!"})
     }
 }
 
@@ -123,7 +107,7 @@ const updateExchangeById = (req, res) =>
 
 const deleteExchangeById = (req, res) =>
 {
-    exchange.deleteOne({user_id: req.headers.authorization._id, _id: req.body._id}, (err) =>
+    exchange.deleteOne({user_id: req.headers.authorization._id, _id: req.params.exchangeId}, (err) =>
     {
         if (err) res.status(400).send(err)
         else res.send({message: "exchange deleted successfully"})
