@@ -44,6 +44,11 @@ app.route("/media/:folder/:file").get((req, res) =>
     res.sendFile(path.join(__dirname, `/media/${req.params.folder}/${req.params.file}`))
 })
 
+app.route("/videos/:file").get((req, res) =>
+{
+    res.sendFile(path.join(__dirname, `/videos/${req.params.file}`))
+})
+
 notFoundRooter(app) // & at the end
 
 // Eventually Run The Server
