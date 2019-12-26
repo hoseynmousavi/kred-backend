@@ -1,9 +1,7 @@
 import tokenHelper from "./tokenHelper"
 
-const addHeaderAndCheckPermissions = (app) =>
-{
-    app.use((req, res, next) =>
-    {
+const addHeaderAndCheckPermissions = (app) => {
+    app.use((req, res, next) => {
         res.setHeader("Access-Control-Allow-Origin", "*")
         if (
             (req.originalUrl === "/") ||
@@ -15,18 +13,15 @@ const addHeaderAndCheckPermissions = (app) =>
             (req.originalUrl.slice(0, 9) === "/category" && req.method === "GET") ||
             (req.originalUrl.slice(0, 13) === "/conversation" && req.method === "GET") ||
             (req.originalUrl.slice(0, 5) === "/city" && req.method === "GET") ||
-            (req.originalUrl.slice(0, 16) === "/media/pictures/" && req.method === "GET")
-        )
-        {
+            (req.originalUrl.slice(0, 16) === "/media/pictures/" && req.method === "GET") ||
+            (req.originalUrl.slice(0, 8) === "/videos/" && req.method === "GET")
+        ) {
             next()
         }
-        else
-        {
-            if (req.headers.authorization)
-            {
+        else {
+            if (req.headers.authorization) {
                 tokenHelper.decodeToken(req.headers.authorization)
-                    .then((payload) =>
-                    {
+                    .then((payload) => {
                         req.headers.authorization = {...payload}
                         next()
                     })
