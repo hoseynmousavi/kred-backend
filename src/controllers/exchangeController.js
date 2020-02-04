@@ -1,13 +1,17 @@
 import mongoose from "mongoose"
 import exchangeModel from "../models/exchangeModel"
+import exchangeCategoryModel from "../models/exchangeCategoryRelation"
 
 const exchange = mongoose.model("exchange", exchangeModel)
+const exchangeCategory = mongoose.model("exchangeCategory", exchangeCategoryModel)
 
 const getExchanges = (req, res) =>
 {
     const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
     const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
-    exchange.find({is_deleted: false, is_verified: true}, {title: 1, price: 1, telegram: 1, whatsapp: 1, phone: 1, city_id: 1, categories: 1, description: 1, created_date: 1, user_id: 1, picture: 1}, {sort: "-created_date", skip, limit}, (err, exchanges) =>
+    let query = {is_deleted: false, is_verified: true}
+    if (req.query.searchTitle) query.title = new RegExp(req.query.searchTitle)
+    exchange.find(query, {title: 1, price: 1, telegram: 1, whatsapp: 1, phone: 1, city_id: 1, categories: 1, description: 1, created_date: 1, user_id: 1, picture: 1}, {sort: "-created_date", skip, limit}, (err, exchanges) =>
     {
         if (err) res.status(400).send(err)
         else res.send(exchanges)
@@ -32,32 +36,29 @@ const addNewExchange = (req, res) =>
         const picture = req.files ? req.files.picture : null
         if (picture)
         {
+            const categories = JSON.parse(req.body.categories)
             const picName = new Date().toISOString() + picture.name
             picture.mv(`media/pictures/${picName}`, (err) =>
             {
-                if (err)
+                if (err) console.log(err)
+                delete req.body.created_date
+                delete req.body.is_deleted
+                delete req.body.user_id
+                req.headers.authorization.role === "admin" ? req.body.is_verified = true : delete req.body.is_verified
+                const newExchange = new exchange({...req.body, picture: `media/pictures/${picName}`, user_id: req.headers.authorization._id})
+                newExchange.save((err, createdExchange) =>
                 {
-                    console.log(err)
-                    res.status(500).send({message: "internal save picture error!"})
-                    return false
-                }
-                else
-                {
-                    delete req.body.created_date
-                    delete req.body.is_deleted
-                    delete req.body.user_id
-                    req.headers.authorization.role === "admin" ? req.body.is_verified = true : delete req.body.is_verified
-                    const newExchange = new exchange({...req.body, categories: JSON.parse(req.body.categories), picture: `media/pictures/${picName}`, user_id: req.headers.authorization._id})
-                    newExchange.save((err, createdExchange) =>
+                    if (err)
                     {
-                        if (err)
-                        {
-                            console.log(err)
-                            res.status(400).send(err)
-                        }
-                        else res.send(createdExchange)
-                    })
-                }
+                        console.log(err)
+                        res.status(400).send(err)
+                    }
+                    else
+                    {
+                        res.send(createdExchange)
+                        categories.forEach(item => new exchangeCategory({category_id: item, exchange_id: createdExchange._id}).save())
+                    }
+                })
             })
         }
         else res.status(400).send({message: "send picture!"})

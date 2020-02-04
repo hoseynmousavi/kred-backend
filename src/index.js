@@ -39,25 +39,30 @@ cityRouter(app)
 categoryRouter(app)
 conversationRouter(app)
 
-app.route("/media/:folder/:file").get((req, res) => {
+app.route("/media/:folder/:file").get((req, res) =>
+{
     res.setHeader("Cache-Control", "max-age=31536000")
     res.sendFile(path.join(__dirname, `/media/${req.params.folder}/${req.params.file}`))
 })
 
-app.route("/videos/:file").get((req, res) => {
+app.route("/videos/:file").get((req, res) =>
+{
     res.setHeader("Cache-Control", "max-age=31536000")
     res.sendFile(path.join(__dirname, `/videos/${req.params.file}`))
 })
 
-app.route("/subtitles/:file").get((req, res) => {
-    if (req.headers.authorization.role === "admin") {
+app.route("/subtitles/:file").get((req, res) =>
+{
+    if (req.headers.authorization.role === "admin")
+    {
         res.setHeader("Cache-Control", "max-age=31536000")
         res.sendFile(path.join(__dirname, `/subtitles/${req.params.file}`))
     }
     else packPermissionController.checkPermission(
         req.headers.authorization.phone,
         (errCode) => res.status(errCode).send({message: "don't have permission"}),
-        () => {
+        () =>
+        {
             res.setHeader("Cache-Control", "max-age=31536000")
             res.sendFile(path.join(__dirname, `/subtitles/${req.params.file}`))
         },
