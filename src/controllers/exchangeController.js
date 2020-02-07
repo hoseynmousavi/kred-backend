@@ -11,11 +11,30 @@ const getExchanges = (req, res) =>
     const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
     let query = {is_deleted: false, is_verified: true}
     if (req.query.searchTitle) query.title = new RegExp(req.query.searchTitle)
-    exchange.find(query, {title: 1, price: 1, telegram: 1, whatsapp: 1, phone: 1, city_id: 1, categories: 1, description: 1, created_date: 1, user_id: 1, picture: 1}, {sort: "-created_date", skip, limit}, (err, exchanges) =>
+
+    if (req.query.searchCategories)
     {
-        if (err) res.status(400).send(err)
-        else res.send(exchanges)
-    })
+        const searchCategoriesArr = req.query.searchCategories.split(",")
+        exchangeCategory.find(
+            {category_id: {$in: searchCategoriesArr.reduce((sum, item) => [...sum, item], [])}},
+            (err, shits) =>
+            {
+                query._id = {$in: shits.reduce((sum, item) => [...sum, item.exchange_id], [])}
+                exchange.find(
+                    query,
+                    {title: 1, price: 1, telegram: 1, whatsapp: 1, phone: 1, city_id: 1, categories: 1, description: 1, created_date: 1, user_id: 1, picture: 1},
+                    {sort: "-created_date", skip, limit},
+                    (err, exchanges) => err ? res.status(400).send(err) : res.send(exchanges),
+                )
+            },
+        )
+    }
+    else exchange.find(
+        query,
+        {title: 1, price: 1, telegram: 1, whatsapp: 1, phone: 1, city_id: 1, categories: 1, description: 1, created_date: 1, user_id: 1, picture: 1},
+        {sort: "-created_date", skip, limit},
+        (err, exchanges) => err ? res.status(400).send(err) : res.send(exchanges),
+    )
 }
 
 const getExchangeById = (req, res) =>
