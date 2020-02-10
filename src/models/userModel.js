@@ -2,7 +2,7 @@ import mongoose from "mongoose"
 
 const model = mongoose.Schema
 
-// const fields = [phone, password, role, email, email_verified, name, major, birth_date, university, avatar, created_date]
+// const fields = [phone, password, role, email, email_verified, name, major, grade, entrance, birth_date, university, avatar, created_date]
 
 const userModel = new model({
     phone: {
@@ -19,9 +19,11 @@ const userModel = new model({
         maxlength: 30,
         required: "Enter Password!",
     },
-    role: { // user & admin & translator
+    role: {
         type: String,
+        enum: ["user", "admin"],
         default: "user",
+        required: "Enter Role!",
     },
     email: {
         type: String,
@@ -36,6 +38,12 @@ const userModel = new model({
         type: String,
     },
     major: {
+        type: String,
+    },
+    grade: {
+        type: String,
+    },
+    entrance: {
         type: String,
     },
     birth_date: {

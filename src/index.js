@@ -15,6 +15,7 @@ import path from "path"
 import categoryRouter from "./routes/categoryRouter"
 import conversationRouter from "./routes/conversationRouter"
 import packPermissionController from "./controllers/packPermissionController"
+import viewRouter from "./routes/viewRouter"
 
 // Normal Things Never Leave Us Alone ...
 const app = express()
@@ -38,6 +39,7 @@ exchangeRouter(app)
 cityRouter(app)
 categoryRouter(app)
 conversationRouter(app)
+viewRouter(app)
 
 app.route("/media/:folder/:file").get((req, res) =>
 {
