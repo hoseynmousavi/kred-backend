@@ -14,8 +14,21 @@ const addView = (req, res) =>
     })
 }
 
+const getViews = (req, res) =>
+{
+    if (req.headers.authorization && req.headers.authorization.role === "admin")
+        view.find(
+            null,
+            null,
+            null,
+            (err, views) => err ? res.status(500).send(err) : res.send(views),
+        )
+    else res.status(403).send()
+}
+
 const viewController = {
     addView,
+    getViews,
 }
 
 export default viewController

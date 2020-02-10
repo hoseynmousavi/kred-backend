@@ -29,7 +29,7 @@ const addNewUser = (req, res) =>
         else
         {
             const user = createdUser.toJSON()
-            tokenHelper.encodeToken(user)
+            tokenHelper.encodeToken({phone: user.phone, _id: user._id, role: user.role})
                 .then((token) => res.send({...user, token}))
                 .catch((err) => res.status(500).send({message: err}))
         }
@@ -53,7 +53,7 @@ const userLogin = (req, res) =>
                 else
                 {
                     const user = takenUser.toJSON()
-                    tokenHelper.encodeToken(user)
+                    tokenHelper.encodeToken({phone: user.phone, _id: user._id, role: user.role})
                         .then((token) => res.send({...user, token}))
                         .catch((err) => res.status(500).send({message: err}))
                 }
@@ -62,7 +62,7 @@ const userLogin = (req, res) =>
         else
         {
             const user = takenUser.toJSON()
-            tokenHelper.encodeToken(user)
+            tokenHelper.encodeToken({phone: user.phone, _id: user._id, role: user.role})
                 .then((token) => res.send({...user, token}))
                 .catch((err) => res.status(500).send({message: err}))
         }

@@ -16,6 +16,10 @@ const viewModel = new schema({
         type: String,
         required: "Enter content!",
     },
+    content_id: {
+        type: schema.Types.ObjectId,
+        ref: "user",
+    },
     created_date: {
         type: Date,
         default: Date.now,
