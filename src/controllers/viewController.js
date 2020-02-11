@@ -1,7 +1,9 @@
 import mongoose from "mongoose"
 import viewModel from "../models/viewModel"
+import userModel from "../models/userModel"
 
 const view = mongoose.model("view", viewModel)
+const user = mongoose.model("user", userModel)
 
 const addView = (req, res) =>
 {
@@ -21,7 +23,69 @@ const getViews = (req, res) =>
             null,
             null,
             null,
-            (err, views) => err ? res.status(500).send(err) : res.send(views),
+            (err, views) =>
+            {
+                if (err) res.status(500).send(err)
+                else
+                {
+                    let allPagesCount = 0
+                    let allPages = {}
+                    let allVideosCount = 0
+                    let allVideos = {}
+                    let allSignUpCount = 0
+
+                    let todayPagesCount = 0
+                    let todayPages = {}
+                    let todayVideosCount = 0
+                    let todayVideos = {}
+                    let todaySignUpCount = 0
+                    views.forEach(item =>
+                    {
+                        if (item.type === "page")
+                        {
+                            allPagesCount++
+                            allPages[item.content] ? allPages[item.content].count++ : allPages[item.content] = {title: item.content, count: 1}
+                            if (item.created_date.toISOString().split("T")[0] === new Date().toISOString().split("T")[0])
+                            {
+                                todayPagesCount++
+                                todayPages[item.content] ? todayPages[item.content].count++ : todayPages[item.content] = {title: item.content, count: 1}
+                            }
+                        }
+                        else if (item.type === "video")
+                        {
+                            allVideosCount++
+                            allVideos[item.content] ? allVideos[item.content].count++ : allVideos[item.content] = {title: item.content, count: 1}
+                            if (item.created_date.toISOString().split("T")[0] === new Date().toISOString().split("T")[0])
+                            {
+                                todayVideosCount++
+                                todayVideos[item.content] ? todayVideos[item.content].count++ : todayVideos[item.content] = {title: item.content, count: 1}
+                            }
+                        }
+                    })
+                    user.find(
+                        {created_date: {$lt: new Date(), $gte: new Date(new Date().setDate(new Date().getDate() - 1))}},
+                        (err, todaySignUp) =>
+                        {
+                            if (err) res.status(500).send(err)
+                            else
+                            {
+                                todaySignUpCount = todaySignUp.length
+                                user.countDocuments(
+                                    null,
+                                    (err, allSignUp) =>
+                                    {
+                                        if (err) res.status(500).send(err)
+                                        else
+                                        {
+                                            allSignUpCount = allSignUp
+                                            res.send({allSignUpCount, allPagesCount, allPages, allVideosCount, allVideos, todaySignUpCount, todaySignUp, todayPagesCount, todayPages, todayVideosCount, todayVideos})
+                                        }
+                                    })
+
+                            }
+                        })
+                }
+            },
         )
     else res.status(403).send()
 }
