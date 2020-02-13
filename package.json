@@ -27,7 +27,8 @@
     "express-fileupload": "^1.1.6-alpha.6",
     "jalali-date": "^1.1.0",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.7.7"
+    "mongoose": "^5.7.7",
+    "nodemailer": "^6.4.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.0",

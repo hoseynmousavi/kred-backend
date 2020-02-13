@@ -16,6 +16,7 @@ import categoryRouter from "./routes/categoryRouter"
 import conversationRouter from "./routes/conversationRouter"
 import packPermissionController from "./controllers/packPermissionController"
 import viewRouter from "./routes/viewRouter"
+import mailHelper from "./functions/mailHelper"
 
 // Normal Things Never Leave Us Alone ...
 const app = express()

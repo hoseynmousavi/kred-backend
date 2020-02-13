@@ -1,6 +1,7 @@
 import mongoose from "mongoose"
 import exchangeModel from "../models/exchangeModel"
 import exchangeCategoryModel from "../models/exchangeCategoryRelation"
+import mailHelper from "../functions/mailHelper"
 
 const exchange = mongoose.model("exchange", exchangeModel)
 const exchangeCategory = mongoose.model("exchangeCategory", exchangeCategoryModel)
@@ -76,6 +77,14 @@ const addNewExchange = (req, res) =>
                     {
                         res.send(createdExchange)
                         categories.forEach(item => new exchangeCategory({category_id: item, exchange_id: createdExchange._id}).save())
+                        if (req.headers.authorization.role !== "admin")
+                        {
+                            mailHelper.sendMail({
+                                subject: "آگهی جدید داریم!",
+                                text: `آگهی جدید : ${createdExchange.title}`,
+                                receivers: "aidin.sh1377@gmail.com, miri1888@gmail.com, erfanv1@gmail.com, eziaie1998@gmail.com, zmahramian@gmail.com, hoseyn.mousavi78@gmail.com",
+                            })
+                        }
                     }
                 })
             })

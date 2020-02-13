@@ -20,7 +20,7 @@ const getViews = (req, res) =>
 {
     if (req.headers.authorization && req.headers.authorization.role === "admin")
         view.find(
-            null,
+            {user_id: {$nin: ["5da0cc1e8088bb5a41e40eff", "5da0e75a7d95bc0b30c492ca", "5da0e8d67d95bc0b30c492cb", "5da2eec47d95bc0b30c492cf", "5dc2ac8955a4e622fe895a92", "5e430d93dec1c036332cf926"]}},
             null,
             null,
             (err, views) =>
