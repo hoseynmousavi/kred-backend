@@ -13,6 +13,11 @@ const exchangeModel = new schema({
         type: Number,
         required: "Enter price!",
     },
+    lined: {
+        type: String,
+        enum: ["ندارد", "کم", "متوسط", "زیاد"],
+        required: "Enter lined!",
+    },
     telegram: {
         type: String,
     },

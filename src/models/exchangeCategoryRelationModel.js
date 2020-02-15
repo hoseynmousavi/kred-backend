@@ -2,7 +2,7 @@ import mongoose from "mongoose"
 
 const schema = mongoose.Schema
 
-const exchangeCategoryModel = new schema({
+const exchangeCategoryRelationModel = new schema({
     exchange_id: {
         type: schema.Types.ObjectId,
         ref: "exchange",
@@ -13,6 +13,6 @@ const exchangeCategoryModel = new schema({
     },
 })
 
-exchangeCategoryModel.index({exchange_id: 1, category_id: 1}, {unique: true})
+exchangeCategoryRelationModel.index({exchange_id: 1, category_id: 1}, {unique: true})
 
-export default exchangeCategoryModel
+export default exchangeCategoryRelationModel

@@ -16,7 +16,8 @@ import categoryRouter from "./routes/categoryRouter"
 import conversationRouter from "./routes/conversationRouter"
 import packPermissionController from "./controllers/packPermissionController"
 import viewRouter from "./routes/viewRouter"
-import mailHelper from "./functions/mailHelper"
+import videoPackRouter from "./routes/videoPackRouter"
+import videoRouter from "./routes/videoRouter"
 
 // Normal Things Never Leave Us Alone ...
 const app = express()
@@ -41,6 +42,8 @@ cityRouter(app)
 categoryRouter(app)
 conversationRouter(app)
 viewRouter(app)
+videoPackRouter(app)
+videoRouter(app)
 
 app.route("/media/:folder/:file").get((req, res) =>
 {

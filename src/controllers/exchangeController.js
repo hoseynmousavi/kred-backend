@@ -1,16 +1,21 @@
 import mongoose from "mongoose"
 import exchangeModel from "../models/exchangeModel"
-import exchangeCategoryModel from "../models/exchangeCategoryRelation"
+import exchangeCategoryRelationModel from "../models/exchangeCategoryRelationModel"
 import mailHelper from "../functions/mailHelper"
+import categoryModel from "../models/categoryModel"
 
 const exchange = mongoose.model("exchange", exchangeModel)
-const exchangeCategory = mongoose.model("exchangeCategory", exchangeCategoryModel)
+const exchangeCategory = mongoose.model("exchangeCategory", exchangeCategoryRelationModel)
+const category = mongoose.model("category", categoryModel)
 
 const getExchanges = (req, res) =>
 {
     const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
     const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
     let query = {is_deleted: false, is_verified: true}
+    const options = {sort: "-created_date", skip, limit}
+    const fields = "title price lined telegram whatsapp phone description picture city_id user_id created_date"
+
     if (req.query.searchTitle) query.title = new RegExp(req.query.searchTitle)
 
     if (req.query.searchCategories)
@@ -18,13 +23,13 @@ const getExchanges = (req, res) =>
         const searchCategoriesArr = req.query.searchCategories.split(",")
         exchangeCategory.find(
             {category_id: {$in: searchCategoriesArr.reduce((sum, item) => [...sum, item], [])}},
-            (err, shits) =>
+            (err, relations) =>
             {
-                query._id = {$in: shits.reduce((sum, item) => [...sum, item.exchange_id], [])}
+                query._id = {$in: relations.reduce((sum, item) => [...sum, item.exchange_id], [])}
                 exchange.find(
                     query,
-                    {title: 1, price: 1, telegram: 1, whatsapp: 1, phone: 1, city_id: 1, categories: 1, description: 1, created_date: 1, user_id: 1, picture: 1},
-                    {sort: "-created_date", skip, limit},
+                    fields,
+                    options,
                     (err, exchanges) => err ? res.status(400).send(err) : res.send(exchanges),
                 )
             },
@@ -32,8 +37,8 @@ const getExchanges = (req, res) =>
     }
     else exchange.find(
         query,
-        {title: 1, price: 1, telegram: 1, whatsapp: 1, phone: 1, city_id: 1, categories: 1, description: 1, created_date: 1, user_id: 1, picture: 1},
-        {sort: "-created_date", skip, limit},
+        fields,
+        options,
         (err, exchanges) => err ? res.status(400).send(err) : res.send(exchanges),
     )
 }
@@ -44,7 +49,28 @@ const getExchangeById = (req, res) =>
     {
         if (err) res.status(500).send(err)
         else if (!takenExchange || takenExchange.is_deleted || !takenExchange.is_verified) res.status(404).send({message: "not found!"})
-        else res.send(takenExchange)
+        else
+        {
+            const exchangeJson = takenExchange.toJSON()
+            delete exchangeJson.is_deleted
+            delete exchangeJson.is_verified
+            exchangeCategory.find({exchange_id: exchangeJson._id}, (err, relations) =>
+            {
+                if (err) res.status(500).send(err)
+                else
+                {
+                    category.find(
+                        {_id: {$in: relations.reduce((sum, item) => [...sum, item.category_id], [])}},
+
+                        (err, categories) =>
+                        {
+                            if (err) res.status(500).send(err)
+                            else res.send({...exchangeJson, categories})
+                        },
+                    )
+                }
+            })
+        }
     })
 }
 
@@ -56,7 +82,6 @@ const addNewExchange = (req, res) =>
         const picture = req.files ? req.files.picture : null
         if (picture)
         {
-            const categories = JSON.parse(req.body.categories)
             const picName = new Date().toISOString() + picture.name
             picture.mv(`media/pictures/${picName}`, (err) =>
             {
@@ -76,6 +101,7 @@ const addNewExchange = (req, res) =>
                     else
                     {
                         res.send(createdExchange)
+                        const categories = JSON.parse(req.body.categories)
                         categories.forEach(item => new exchangeCategory({category_id: item, exchange_id: createdExchange._id}).save())
                         if (req.headers.authorization.role !== "admin")
                         {
