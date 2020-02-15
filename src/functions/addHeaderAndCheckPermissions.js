@@ -14,10 +14,11 @@ const addHeaderAndCheckPermissions = (app) =>
             (req.originalUrl === "/datepicker") ||
             (req.originalUrl.slice(0, 9) === "/exchange" && req.method === "GET") ||
             (req.originalUrl.slice(0, 9) === "/category" && req.method === "GET") ||
+            (req.originalUrl.slice(0, 8) === "/company" && req.method === "GET") ||
             (req.originalUrl.slice(0, 13) === "/conversation" && req.method === "GET") ||
             (req.originalUrl.slice(0, 5) === "/city" && req.method === "GET") ||
             (req.originalUrl.slice(0, 16) === "/media/pictures/" && req.method === "GET") ||
-            (req.originalUrl.slice(0, 8) === "/videos/" && req.method === "GET")
+            (req.originalUrl.slice(0, 6) === "/video" && req.method === "GET")
         )
         {
             if (req.headers.authorization)

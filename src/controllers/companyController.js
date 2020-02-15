@@ -1,23 +1,20 @@
 import mongoose from "mongoose"
-import videoPackModel from "../models/videoPackModel"
+import companyModel from "../models/companyModel"
 
-const videoPack = mongoose.model("videoPack", videoPackModel)
+const company = mongoose.model("company", companyModel)
 
-const getVideoPacks = (req, res) =>
+const getCompanies = (req, res) =>
 {
     const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
     const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
-    const options = {sort: "-created_date", skip, limit}
-
-    videoPack.find(
-        {is_deleted: false},
-        null,
-        options,
-        (err, videoPacks) => err ? res.status(400).send(err) : res.send(videoPacks),
-    )
+    company.find(null, null, {skip, limit}, (err, companies) =>
+    {
+        if (err) res.status(400).send(err)
+        else res.send(companies)
+    })
 }
 
-const addNewVideoPack = (req, res) =>
+const addCompany = (req, res) =>
 {
     if (req.headers.authorization.role === "admin")
     {
@@ -29,17 +26,15 @@ const addNewVideoPack = (req, res) =>
             {
                 if (err) console.log(err)
                 delete req.body.created_date
-                delete req.body.is_deleted
-                delete req.body.user_id
-                const newVideoPack = new videoPack({...req.body, picture: `media/pictures/${picName}`, user_id: req.headers.authorization._id})
-                newVideoPack.save((err, createdPack) =>
+                const newCompany = new company({...req.body, picture: `media/pictures/${picName}`})
+                newCompany.save((err, createdCompany) =>
                 {
                     if (err)
                     {
                         console.log(err)
                         res.status(400).send(err)
                     }
-                    else res.send(createdPack)
+                    else res.send(createdCompany)
                 })
             })
         }
@@ -48,9 +43,9 @@ const addNewVideoPack = (req, res) =>
     else res.status(403).send({message: "you don't have permission babe!"})
 }
 
-const videoPackController = {
-    getVideoPacks,
-    addNewVideoPack,
+const companyController = {
+    getCompanies,
+    addCompany,
 }
 
-export default videoPackController
+export default companyController

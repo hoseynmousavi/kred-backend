@@ -3,11 +3,20 @@ import mongoose from "mongoose"
 const schema = mongoose.Schema
 
 const videoModel = new schema({
+    video_pack_category_id: {
+        type: schema.Types.ObjectId,
+        required: "Enter video_pack_category_id!",
+        ref: "videoPackCategory",
+    },
     title: {
         type: String,
         minlength: 1,
         maxlength: 60,
         required: "Enter title!",
+    },
+    is_free: {
+        type: Boolean,
+        default: false,
     },
     video_url: {
         type: String,

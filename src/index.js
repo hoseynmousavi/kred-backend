@@ -18,6 +18,8 @@ import packPermissionController from "./controllers/packPermissionController"
 import viewRouter from "./routes/viewRouter"
 import videoPackRouter from "./routes/videoPackRouter"
 import videoRouter from "./routes/videoRouter"
+import companyRouter from "./routes/companyRouter"
+import videoPackCategoryRouter from "./routes/videoPackCategoryRouter"
 
 // Normal Things Never Leave Us Alone ...
 const app = express()
@@ -44,6 +46,8 @@ conversationRouter(app)
 viewRouter(app)
 videoPackRouter(app)
 videoRouter(app)
+companyRouter(app)
+videoPackCategoryRouter(app)
 
 app.route("/media/:folder/:file").get((req, res) =>
 {

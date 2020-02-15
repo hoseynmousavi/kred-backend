@@ -11,6 +11,7 @@ const getVideos = (req, res) =>
 
     video.find(
         {is_deleted: false},
+        null,
         options,
         (err, exchanges) => err ? res.status(400).send(err) : res.send(exchanges),
     )
@@ -23,8 +24,9 @@ const addNewVideo = (req, res) =>
         delete req.body.created_date
         delete req.body.is_deleted
         delete req.body.user_id
-        const newPack = new pack({...req.body, user_id: req.headers.authorization._id})
-        newPack.save((err, createdVideo) =>
+        delete req.body.is_free
+        const newVideo = new video({...req.body, user_id: req.headers.authorization._id})
+        newVideo.save((err, createdVideo) =>
         {
             if (err)
             {
