@@ -5,7 +5,15 @@ const schema = mongoose.Schema
 const companyModel = new schema({
     name: {
         type: String,
-        required: "Enter Name!",
+        required: "Enter name!",
+    },
+    english_name: {
+        type: String,
+        required: "Enter english_name!",
+    },
+    description: {
+        type: String,
+        required: "Enter description!",
     },
     picture: {
         type: String,
