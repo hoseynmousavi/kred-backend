@@ -41,24 +41,10 @@ const userLogin = (req, res) =>
     const phone = req.body.phone
     const password = req.body.password
 
-    user.findOne({phone, password}, (err, takenUser) =>
+    user.findOne({$or: [{phone}, {email: phone}], password}, (err, takenUser) =>
     {
         if (err) res.status(400).send(err)
-        else if (!takenUser)
-        {
-            user.findOne({email: phone, password}, (err, takenUser) =>
-            {
-                if (err) res.status(400).send(err)
-                else if (!takenUser) res.status(404).send({message: "user not found!"})
-                else
-                {
-                    const user = takenUser.toJSON()
-                    tokenHelper.encodeToken({phone: user.phone, _id: user._id, role: user.role})
-                        .then((token) => res.send({...user, token}))
-                        .catch((err) => res.status(500).send({message: err}))
-                }
-            })
-        }
+        else if (!takenUser) res.status(404).send({message: "user not found!"})
         else
         {
             const user = takenUser.toJSON()
