@@ -45,7 +45,7 @@ const getViews = (req, res) =>
                         {
                             allPagesCount++
                             allPages[item.content] ? allPages[item.content].count++ : allPages[item.content] = {title: item.content, count: 1}
-                            if (item.created_date.toISOString().split("T")[0] === new Date().toISOString().split("T")[0])
+                            if (item.created_date >= new Date().setDate(new Date().getDate() - 1))
                             {
                                 todayPagesCount++
                                 todayPages[item.content] ? todayPages[item.content].count++ : todayPages[item.content] = {title: item.content, count: 1}
@@ -55,7 +55,7 @@ const getViews = (req, res) =>
                         {
                             allVideosCount++
                             allVideos[item.content] ? allVideos[item.content].count++ : allVideos[item.content] = {title: item.content, count: 1}
-                            if (item.created_date.toISOString().split("T")[0] === new Date().toISOString().split("T")[0])
+                            if (item.created_date >= new Date().setDate(new Date().getDate() - 1))
                             {
                                 todayVideosCount++
                                 todayVideos[item.content] ? todayVideos[item.content].count++ : todayVideos[item.content] = {title: item.content, count: 1}
@@ -63,7 +63,7 @@ const getViews = (req, res) =>
                         }
                     })
                     user.find(
-                        {created_date: {$lt: new Date(), $gte: new Date(new Date().setDate(new Date().getDate() - 1))}},
+                        {created_date: {$lt: new Date(), $gte: new Date().setDate(new Date().getDate() - 1)}},
                         (err, todaySignUp) =>
                         {
                             if (err) res.status(500).send(err)
