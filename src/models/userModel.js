@@ -2,7 +2,7 @@ import mongoose from "mongoose"
 
 const model = mongoose.Schema
 
-// const fields = [phone, password, role, email, email_verified, name, major, grade, entrance, birth_date, university, avatar, created_date]
+// const fields = [phone, phone_verified, password, role, email, email_verified, name, major, grade, entrance, birth_date, university, avatar, created_date]
 
 const userModel = new model({
     phone: {
@@ -12,6 +12,10 @@ const userModel = new model({
         maxlength: 11,
         index: true,
         required: "Enter Phone!",
+    },
+    phone_verified: {
+        type: Boolean,
+        default: true,
     },
     password: {
         type: String,

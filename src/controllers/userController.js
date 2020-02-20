@@ -1,6 +1,7 @@
 import mongoose from "mongoose"
 import userModel from "../models/userModel"
 import tokenHelper from "../functions/tokenHelper"
+import verificationCodeController from "./verificationCodeController"
 
 const user = mongoose.model("user", userModel)
 
@@ -22,18 +23,23 @@ const addNewUser = (req, res) =>
     delete req.body.created_date
     delete req.body.role
     delete req.body.email_verified
-    const newUser = new user(req.body)
-    newUser.save((err, createdUser) =>
+    delete req.body.phone_verified
+    verificationCodeController.verifyCode({phone: req.body.phone, code: req.body.code}).then(() =>
     {
-        if (err) res.status(400).send(err)
-        else
+        const newUser = new user(req.body)
+        newUser.save((err, createdUser) =>
         {
-            const user = createdUser.toJSON()
-            tokenHelper.encodeToken({phone: user.phone, _id: user._id, role: user.role})
-                .then((token) => res.send({...user, token}))
-                .catch((err) => res.status(500).send({message: err}))
-        }
+            if (err) res.status(400).send(err)
+            else
+            {
+                const user = createdUser.toJSON()
+                tokenHelper.encodeToken({phone: user.phone, _id: user._id, role: user.role})
+                    .then((token) => res.send({...user, token}))
+                    .catch((err) => res.status(500).send({message: err}))
+            }
+        })
     })
+        .catch(err => res.status(err.status).send({message: err.err}))
 }
 
 const userLogin = (req, res) =>
@@ -61,6 +67,7 @@ const updateUserById = (req, res) =>
     delete req.body.created_date
     delete req.body.role
     delete req.body.email_verified
+    delete req.body.phone_verified
     user.findOneAndUpdate({_id: req.headers.authorization._id}, req.body, {new: true, useFindAndModify: false, runValidators: true}, (err, updatedUser) =>
     {
         if (err) res.status(400).send(err)

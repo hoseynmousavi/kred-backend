@@ -9,6 +9,7 @@ const addHeaderAndCheckPermissions = (app) =>
             (req.originalUrl === "/") ||
             (req.originalUrl === "/user/" && req.method === "POST") ||
             (req.originalUrl === "/view/" && req.method === "POST") ||
+            (req.originalUrl === "/code/") ||
             (req.originalUrl === "/user/phone_check/") ||
             (req.originalUrl === "/user/login/") ||
             (req.originalUrl === "/datepicker") ||

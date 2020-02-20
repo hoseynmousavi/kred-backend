@@ -20,6 +20,7 @@ import videoPackRouter from "./routes/videoPackRouter"
 import videoRouter from "./routes/videoRouter"
 import companyRouter from "./routes/companyRouter"
 import videoPackCategoryRouter from "./routes/videoPackCategoryRouter"
+import verificationCodeRouter from "./routes/verificationCodeRouter"
 
 // Normal Things Never Leave Us Alone ...
 const app = express()
@@ -48,6 +49,7 @@ videoPackRouter(app)
 videoRouter(app)
 companyRouter(app)
 videoPackCategoryRouter(app)
+verificationCodeRouter(app)
 
 app.route("/media/:folder/:file").get((req, res) =>
 {
