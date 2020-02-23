@@ -3,18 +3,34 @@ import videoPackCategoryModel from "../models/videoPackCategoryModel"
 
 const videoPackCategory = mongoose.model("videoPackCategory", videoPackCategoryModel)
 
-const getVideoPackCategories = (req, res) =>
+const getVideoPackCategories = ({videoPackId}) =>
 {
-    const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
-    const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
-    const options = {skip, limit}
+    return new Promise((resolve, reject) =>
+    {
+        videoPackCategory.find(
+            {video_pack_id: videoPackId},
+            null,
+            null,
+            (err, videoPackCategories) =>
+            {
+                if (err) reject({status: 500, err})
+                else resolve({status: 200, videoPackCategories})
+            },
+        )
+    })
+}
 
-    videoPackCategory.find(
-        null,
-        null,
-        options,
-        (err, videoPackCategories) => err ? res.status(400).send(err) : res.send(videoPackCategories),
-    )
+const getVideoPackCategoryByVideo = ({videoPackCategoryId}) =>
+{
+    return new Promise((resolve, reject) =>
+    {
+        videoPackCategory.findOne({_id: videoPackCategoryId}, (err, videoPackCategory) =>
+        {
+            if (err) reject({status: 500, err})
+            else if (!videoPackCategory) reject({status: 404, err: {message: "not found!"}})
+            else resolve({status: 200, videoPackCategory})
+        })
+    })
 }
 
 const addNewVideoPackCategory = (req, res) =>
@@ -60,6 +76,7 @@ const addNewVideoPackCategory = (req, res) =>
 const videoPackCategoryController = {
     getVideoPackCategories,
     addNewVideoPackCategory,
+    getVideoPackCategoryByVideo,
 }
 
 export default videoPackCategoryController

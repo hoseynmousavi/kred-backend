@@ -21,6 +21,9 @@ import videoRouter from "./routes/videoRouter"
 import companyRouter from "./routes/companyRouter"
 import videoPackCategoryRouter from "./routes/videoPackCategoryRouter"
 import verificationCodeRouter from "./routes/verificationCodeRouter"
+import videoController from "./controllers/videoController"
+import videoPackCategoryController from "./controllers/videoPackCategoryController"
+import videoPackController from "./controllers/videoPackController"
 
 // Normal Things Never Leave Us Alone ...
 const app = express()
@@ -72,28 +75,28 @@ app.route("/subtitles/:file").get((req, res) =>
     }
     else
     {
-        packPermissionController.checkPermission(
-            req.headers.authorization.phone,
-            (errCode) =>
+        const subtitleUrl = `/subtitles/${req.params.file}`
+        videoController.getVideoBySubtitleUrl({subtitleUrl})
+            .then((resultVideo) =>
             {
-                if (
-                    req.params.file === "Superior view of base of the skull" ||
-                    req.params.file === "Inferior view of base of the skull" ||
-                    req.params.file === "Superficial nerves of the head" ||
-                    req.params.file === "Cervical plexus"
-                )
-                {
-                    res.setHeader("Cache-Control", "max-age=31536000")
-                    res.status(202).sendFile(path.join(__dirname, `/subtitles/${req.params.file}`))
-                }
-                else res.status(errCode).send({message: "don't have permission"})
-            },
-            () =>
-            {
-                res.setHeader("Cache-Control", "max-age=31536000")
-                res.sendFile(path.join(__dirname, `/subtitles/${req.params.file}`))
-            },
-        )
+                videoPackCategoryController.getVideoPackCategoryByVideo({videoPackCategoryId: resultVideo.video.video_pack_category_id})
+                    .then((resultCategory) =>
+                    {
+                        videoPackController.getPermissionsFunc({condition: {user_id: req.headers.authorization._id, video_pack_id: resultCategory.videoPackCategory.video_pack_id}})
+                            .then((resultPermission) =>
+                            {
+                                if (resultPermission.relations && resultPermission.relations.length > 0) res.sendFile(path.join(__dirname, `/subtitles/${req.params.file}`))
+                                else
+                                {
+                                    if (resultVideo.video.is_free) res.status(202).sendFile(path.join(__dirname, `/subtitles/${req.params.file}`))
+                                    else res.status(403).send({message: "don't have permission"})
+                                }
+                            })
+                            .catch((result) => res.status(result.status || 500).send(result.err))
+                    })
+                    .catch((result) => res.status(result.status || 500).send(result.err))
+            })
+            .catch((result) => res.status(result.status || 500).send(result.err))
     }
 })
 

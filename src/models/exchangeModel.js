@@ -61,5 +61,3 @@ const exchangeModel = new schema({
 })
 
 export default exchangeModel
-
-// TODO Hoseyn add Expire to this shit

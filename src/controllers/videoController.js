@@ -3,18 +3,34 @@ import videoModel from "../models/videoModel"
 
 const video = mongoose.model("video", videoModel)
 
-const getVideos = (req, res) =>
+const getVideos = ({videoPackCategoryId}) =>
 {
-    const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
-    const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
-    const options = {sort: "-created_date", skip, limit}
+    return new Promise((resolve, reject) =>
+    {
+        video.find(
+            {is_deleted: false, video_pack_category_id: videoPackCategoryId},
+            null,
+            null,
+            (err, videoPackVideos) =>
+            {
+                if (err) reject({status: 500, err})
+                else resolve({status: 200, videoPackVideos})
+            },
+        )
+    })
+}
 
-    video.find(
-        {is_deleted: false},
-        null,
-        options,
-        (err, exchanges) => err ? res.status(400).send(err) : res.send(exchanges),
-    )
+const getVideoBySubtitleUrl = ({subtitleUrl}) =>
+{
+    return new Promise((resolve, reject) =>
+    {
+        video.findOne({subtitle_url: subtitleUrl}, (err, video) =>
+        {
+            if (err) reject({status: 500, err})
+            else if (!video) reject({status: 404, err: {message: "not found!"}})
+            else resolve({status: 200, video})
+        })
+    })
 }
 
 const addNewVideo = (req, res) =>
@@ -42,6 +58,7 @@ const addNewVideo = (req, res) =>
 const videoController = {
     getVideos,
     addNewVideo,
+    getVideoBySubtitleUrl,
 }
 
 export default videoController
