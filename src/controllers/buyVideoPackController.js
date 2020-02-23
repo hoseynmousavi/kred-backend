@@ -1,0 +1,118 @@
+import mongoose from "mongoose"
+import videoPackController from "./videoPackController"
+import axios from "axios"
+import buyVideoPackModel from "../models/buyVideoPackModel"
+import userVideoPackRelationController from "./userVideoPackRelationController"
+
+const buyVideoPack = mongoose.model("buyVideoPack", buyVideoPackModel)
+
+const getLinkForPay = (req, res) =>
+{
+    const {video_pack_id} = req.body
+    const user_id = req.headers.authorization._id
+
+    if (user_id && video_pack_id)
+    {
+        videoPackController.getPermissionsFunc({condition: {user_id, video_pack_id}})
+            .then((resultPermission) =>
+            {
+                if (resultPermission.relations && resultPermission.relations.length > 0) res.status(400).send({message: "bad request!"})
+                else
+                {
+                    videoPackController.getPureVideoPackById({videoPackId: video_pack_id})
+                        .then((result) =>
+                        {
+                            const newBuyVideoPack = new buyVideoPack({user_id, video_pack_id, price: result.videoPack.price})
+                            newBuyVideoPack.save((err, createdOrder) =>
+                            {
+                                if (err) res.status(500).send(err)
+                                else
+                                {
+                                    axios.post("https://api.idpay.ir/v1.1/payment",
+                                        {
+                                            order_id: createdOrder._id,
+                                            amount: result.videoPack.price * 10,
+                                            name: user_id,
+                                            callback: "https://restful.kred.ir/payment",
+                                        },
+                                        {headers: {"X-API-KEY": "d67fb421-565f-4fd2-8ca7-e4e8c3067e7f"}})
+                                        .then((response) =>
+                                        {
+                                            if (response.status === 201)
+                                            {
+                                                const {id, link} = response.data
+                                                buyVideoPack.findOneAndUpdate({_id: createdOrder._id}, {link, id_pay_id: id}, {new: true, useFindAndModify: false, runValidators: true}, (err, _) =>
+                                                {
+                                                    if (err) res.status(500).send(err)
+                                                    else res.send({link})
+                                                })
+                                            }
+                                            else
+                                            {
+                                                console.log(" %cERROR ", "color: orange; font-size:12px; font-family: 'Helvetica',consolas,sans-serif; font-weight:900;", response)
+                                                res.status(500).send({message: "err"})
+                                            }
+                                        })
+                                        .catch((err) =>
+                                        {
+                                            console.log(" %cERROR ", "color: orange; font-size:12px; font-family: 'Helvetica',consolas,sans-serif; font-weight:900;", err.response.data)
+                                            res.status(500).send({message: err.response.data})
+                                        })
+                                }
+                            })
+                        })
+                        .catch((err) => res.status(err.status || 500).send(err.err))
+                }
+            })
+            .catch((result) => res.status(result.status || 500).send(result.err))
+    }
+    else res.status(400).send({message: "bad request!"})
+}
+
+const returnAfterPayment = (req, res) =>
+{
+    const {status, track_id, id, order_id, date} = req.body
+    if (status == 10)
+    {
+        axios.post("https://api.idpay.ir/v1.1/payment/verify",
+            {
+                order_id,
+                id,
+            },
+            {headers: {"X-API-KEY": "d67fb421-565f-4fd2-8ca7-e4e8c3067e7f"}})
+            .then((response) =>
+            {
+                if (response.status === 200)
+                {
+                    buyVideoPack.findOneAndUpdate({_id: order_id, id_pay_id: id}, {track_id, payment_successful_date: date, is_done_successful: true}, {new: true, useFindAndModify: false, runValidators: true}, (err, updatedOrder) =>
+                    {
+                        if (err || !updatedOrder) res.redirect("https://www.kred.ir/payment/fail")
+                        else
+                        {
+                            userVideoPackRelationController.addUserVideoPackPermission({video_pack_id: updatedOrder.video_pack_id, user_id: updatedOrder.user_id})
+                                .then(() => res.redirect("https://www.kred.ir/payment/success"))
+                                .catch(() => res.redirect("https://www.kred.ir/payment/fail"))
+                        }
+                    })
+                }
+                else
+                {
+                    console.log(" %cERROR ", "color: orange; font-size:12px; font-family: 'Helvetica',consolas,sans-serif; font-weight:900;", response)
+                    res.redirect("https://www.kred.ir/payment/fail")
+                }
+            })
+            .catch((err) =>
+            {
+                console.log(" %cERROR ", "color: orange; font-size:12px; font-family: 'Helvetica',consolas,sans-serif; font-weight:900;", err.response.data)
+                res.redirect("https://www.kred.ir/payment/fail")
+            })
+    }
+    else res.redirect("https://www.kred.ir/payment/fail")
+}
+
+const buyVideoPackController = {
+    getLinkForPay,
+    returnAfterPayment,
+}
+
+export default buyVideoPackController

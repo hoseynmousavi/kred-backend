@@ -113,6 +113,19 @@ const getVideoPackById = (req, res) =>
     })
 }
 
+const getPureVideoPackById = ({videoPackId}) =>
+{
+    return new Promise((resolve, reject) =>
+    {
+        videoPack.findById(videoPackId, (err, takenVideoPack) =>
+        {
+            if (err) reject({status: 500, err})
+            else if (!takenVideoPack || takenVideoPack.is_deleted) reject({status: 404, err: {message: "not found!"}})
+            else resolve({status: 200, videoPack: takenVideoPack.toJSON()})
+        })
+    })
+}
+
 const addNewVideoPack = (req, res) =>
 {
     if (req.headers.authorization.role === "admin")
@@ -149,6 +162,7 @@ const videoPackController = {
     addNewVideoPack,
     getVideoPackById,
     getPermissionsFunc,
+    getPureVideoPackById,
 }
 
 export default videoPackController

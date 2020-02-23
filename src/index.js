@@ -24,6 +24,7 @@ import verificationCodeRouter from "./routes/verificationCodeRouter"
 import videoController from "./controllers/videoController"
 import videoPackCategoryController from "./controllers/videoPackCategoryController"
 import videoPackController from "./controllers/videoPackController"
+import buyVideoPackRouter from "./routes/buyVideoPackRouter"
 
 // Normal Things Never Leave Us Alone ...
 const app = express()
@@ -52,6 +53,7 @@ videoPackRouter(app)
 videoRouter(app)
 companyRouter(app)
 videoPackCategoryRouter(app)
+buyVideoPackRouter(app)
 verificationCodeRouter(app)
 
 app.route("/media/:folder/:file").get((req, res) =>
@@ -70,7 +72,6 @@ app.route("/subtitles/:file").get((req, res) =>
 {
     if (req.headers.authorization.role === "admin")
     {
-        res.setHeader("Cache-Control", "max-age=31536000")
         res.sendFile(path.join(__dirname, `/subtitles/${req.params.file}`))
     }
     else

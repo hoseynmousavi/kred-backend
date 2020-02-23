@@ -3,20 +3,21 @@ import userVideoPackRelationModel from "../models/userVideoPackRelationModel"
 
 const userVideoPackRelation = mongoose.model("userVideoPack", userVideoPackRelationModel)
 
-const addUserVideoPackPermission = (req, res) =>
+const addUserVideoPackPermission = ({user_id, video_pack_id}) =>
 {
-    const newUserVideoPackRelation = new userVideoPackRelation(req.body)
-    newUserVideoPackRelation.save((err, createdRelation) =>
+    return new Promise((resolve, reject) =>
     {
-        if (err) res.status(500).send(err)
-        else res.send(createdRelation)
+        const newUserVideoPackRelation = new userVideoPackRelation({user_id, video_pack_id})
+        newUserVideoPackRelation.save((err, _) =>
+        {
+            if (err) reject({status: 500, err})
+            else resolve({status: 200})
+        })
     })
 }
 
 const userVideoPackRelationController = {
     addUserVideoPackPermission,
 }
-
-// TODO Hoseyn add buy option
 
 export default userVideoPackRelationController
