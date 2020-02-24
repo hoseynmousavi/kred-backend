@@ -13,6 +13,10 @@ const buyVideoPackModel = new schema({
         ref: "videoPack",
         required: "Enter video_pack_id!",
     },
+    off_code_id: {
+        type: schema.Types.ObjectId,
+        ref: "offCode",
+    },
     price: {
         type: Number,
         required: "Enter price!",

@@ -24,6 +24,7 @@ import videoController from "./controllers/videoController"
 import videoPackCategoryController from "./controllers/videoPackCategoryController"
 import videoPackController from "./controllers/videoPackController"
 import buyVideoPackRouter from "./routes/buyVideoPackRouter"
+import offCodeRouter from "./routes/offCodeRouter"
 
 // Normal Things Never Leave Us Alone ...
 const app = express()
@@ -54,6 +55,7 @@ companyRouter(app)
 videoPackCategoryRouter(app)
 buyVideoPackRouter(app)
 verificationCodeRouter(app)
+offCodeRouter(app)
 
 app.route("/media/:folder/:file").get((req, res) =>
 {

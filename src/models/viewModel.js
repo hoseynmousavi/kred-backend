@@ -10,7 +10,7 @@ const viewModel = new schema({
     type: {
         type: String,
         enum: ["page", "video"],
-        required: "Enter Type!",
+        required: "Enter type!",
     },
     content: {
         type: String,

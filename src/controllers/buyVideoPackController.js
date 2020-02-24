@@ -3,12 +3,13 @@ import videoPackController from "./videoPackController"
 import axios from "axios"
 import buyVideoPackModel from "../models/buyVideoPackModel"
 import userVideoPackRelationController from "./userVideoPackRelationController"
+import offCodeController from "./offCodeController"
 
 const buyVideoPack = mongoose.model("buyVideoPack", buyVideoPackModel)
 
 const getLinkForPay = (req, res) =>
 {
-    const {video_pack_id} = req.body
+    const {video_pack_id, code} = req.body
     const user_id = req.headers.authorization._id
 
     if (user_id && video_pack_id)
@@ -22,44 +23,26 @@ const getLinkForPay = (req, res) =>
                     videoPackController.getPureVideoPackById({videoPackId: video_pack_id})
                         .then((result) =>
                         {
-                            const newBuyVideoPack = new buyVideoPack({user_id, video_pack_id, price: result.videoPack.price})
-                            newBuyVideoPack.save((err, createdOrder) =>
+                            if (code)
                             {
-                                if (err) res.status(500).send(err)
-                                else
-                                {
-                                    axios.post("https://api.idpay.ir/v1.1/payment",
-                                        {
-                                            order_id: createdOrder._id,
-                                            amount: result.videoPack.price * 10,
-                                            name: user_id,
-                                            callback: "https://restful.kred.ir/payment",
-                                        },
-                                        {headers: {"X-API-KEY": "d67fb421-565f-4fd2-8ca7-e4e8c3067e7f"}})
-                                        .then((response) =>
-                                        {
-                                            if (response.status === 201)
-                                            {
-                                                const {id, link} = response.data
-                                                buyVideoPack.findOneAndUpdate({_id: createdOrder._id}, {link, id_pay_id: id}, {new: true, useFindAndModify: false, runValidators: true}, (err, _) =>
-                                                {
-                                                    if (err) res.status(500).send(err)
-                                                    else res.send({link})
-                                                })
-                                            }
-                                            else
-                                            {
-                                                console.log(" %cERROR ", "color: orange; font-size:12px; font-family: 'Helvetica',consolas,sans-serif; font-weight:900;", response)
-                                                res.status(500).send({message: "err"})
-                                            }
+                                offCodeController.validateCodeFunc({code, user_id})
+                                    .then((resultCode) =>
+                                    {
+                                        const {code} = resultCode
+                                        shopVideoPack({
+                                            user_id,
+                                            video_pack_id,
+                                            price: result.videoPack.price - (code.amount_type === "fix" ? code.amount : code.amount / 100 * result.videoPack.price),
+                                            off_code_id: code._id,
+                                            res,
                                         })
-                                        .catch((err) =>
-                                        {
-                                            console.log(" %cERROR ", "color: orange; font-size:12px; font-family: 'Helvetica',consolas,sans-serif; font-weight:900;", err.response.data)
-                                            res.status(500).send({message: err.response.data})
-                                        })
-                                }
-                            })
+                                    })
+                                    .catch((resultCode) => res.status(resultCode.status || 500).send(resultCode.err))
+                            }
+                            else
+                            {
+                                shopVideoPack({user_id, video_pack_id, price: result.videoPack.price, res})
+                            }
                         })
                         .catch((err) => res.status(err.status || 500).send(err.err))
                 }
@@ -67,6 +50,48 @@ const getLinkForPay = (req, res) =>
             .catch((result) => res.status(result.status || 500).send(result.err))
     }
     else res.status(400).send({message: "bad request!"})
+}
+
+const shopVideoPack = ({user_id, video_pack_id, price, off_code_id, res}) =>
+{
+    const newBuyVideoPack = new buyVideoPack({user_id, video_pack_id, price, off_code_id})
+    newBuyVideoPack.save((err, createdOrder) =>
+    {
+        if (err) res.status(500).send(err)
+        else
+        {
+            axios.post("https://api.idpay.ir/v1.1/payment",
+                {
+                    order_id: createdOrder._id,
+                    amount: price * 10,
+                    name: user_id,
+                    callback: "https://restful.kred.ir/payment",
+                },
+                {headers: {"X-API-KEY": "d67fb421-565f-4fd2-8ca7-e4e8c3067e7f"}})
+                .then((response) =>
+                {
+                    if (response.status === 201)
+                    {
+                        const {id, link} = response.data
+                        buyVideoPack.findOneAndUpdate({_id: createdOrder._id}, {link, id_pay_id: id}, {new: true, useFindAndModify: false, runValidators: true}, (err, _) =>
+                        {
+                            if (err) res.status(500).send(err)
+                            else res.send({link})
+                        })
+                    }
+                    else
+                    {
+                        console.log(" %cERROR ", "color: orange; font-size:12px; font-family: 'Helvetica',consolas,sans-serif; font-weight:900;", response)
+                        res.status(500).send({message: "err"})
+                    }
+                })
+                .catch((err) =>
+                {
+                    console.log(" %cERROR ", "color: orange; font-size:12px; font-family: 'Helvetica',consolas,sans-serif; font-weight:900;", err.response.data)
+                    res.status(500).send({message: err.response.data})
+                })
+        }
+    })
 }
 
 const returnAfterPayment = (req, res) =>
@@ -90,7 +115,11 @@ const returnAfterPayment = (req, res) =>
                         else
                         {
                             userVideoPackRelationController.addUserVideoPackPermission({video_pack_id: updatedOrder.video_pack_id, user_id: updatedOrder.user_id})
-                                .then(() => res.redirect("https://www.kred.ir/payment/success"))
+                                .then(() =>
+                                {
+                                    res.redirect("https://www.kred.ir/payment/success")
+                                    if (updatedOrder.off_code_id) offCodeController.useOffCode({user_id: updatedOrder.user_id, off_code_id: updatedOrder.off_code_id})
+                                })
                                 .catch(() => res.redirect("https://www.kred.ir/payment/fail"))
                         }
                     })

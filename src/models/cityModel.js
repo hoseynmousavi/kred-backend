@@ -5,7 +5,7 @@ const schema = mongoose.Schema
 const cityModel = new schema({
     name: {
         type: String,
-        required: "Enter Name!",
+        required: "Enter name!",
     },
 })
 

@@ -11,7 +11,7 @@ const userModel = new model({
         minlength: 11,
         maxlength: 11,
         index: true,
-        required: "Enter Phone!",
+        required: "Enter phone!",
     },
     phone_verified: {
         type: Boolean,
@@ -21,13 +21,13 @@ const userModel = new model({
         type: String,
         minlength: 6,
         maxlength: 30,
-        required: "Enter Password!",
+        required: "Enter password!",
     },
     role: {
         type: String,
         enum: ["user", "admin"],
         default: "user",
-        required: "Enter Role!",
+        required: "Enter role!",
     },
     email: {
         type: String,
