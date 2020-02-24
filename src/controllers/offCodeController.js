@@ -64,7 +64,7 @@ const addOffCode = (req, res) =>
     {
         delete req.body.users_who_user
         delete req.body.usage
-        if (req.body.expire_date && !isNaN(req.body.expire_date)) req.body.expire_date = new Date().setDate(new Date().getDate() + req.body.expire_date)
+        if (req.body.expire_date && !isNaN(req.body.expire_date)) req.body.expire_date = new Date().setDate(new Date().getDate() + parseInt(req.body.expire_date))
         else delete req.body.expire_date
 
         const newOffCode = new offCode(req.body)
