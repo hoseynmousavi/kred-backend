@@ -13,13 +13,13 @@ const validateCodeFunc = ({code, user_id}) =>
             else if (!takenCode) reject({status: 404, err: {message: "کدی با این متن یافت نشد!"}})
             else
             {
-                if (takenCode.expire_date >= Date.now() && takenCode.usage < takenCode.max_usage && takenCode.users_who_user.indexOf(user_id) === -1)
+                if (takenCode.expire_date >= Date.now() && takenCode.usage < takenCode.max_usage && takenCode.users_who_use.indexOf(user_id) === -1)
                 {
                     resolve({status: 200, code: takenCode})
                 }
                 else
                 {
-                    if (!(takenCode.users_who_user.indexOf(user_id) === -1))
+                    if (!(takenCode.users_who_use.indexOf(user_id) === -1))
                     {
                         reject({status: 400, err: {message: "کد تخفیف قبلا توسط شما استفاده شده است!"}})
                     }
@@ -52,7 +52,7 @@ const validateCode = (req, res) =>
 
 const useOffCode = ({off_code_id, user_id}) =>
 {
-    offCode.findOneAndUpdate({_id: off_code_id}, {$inc: {usage: 1}, $push: {users_who_user: user_id}}, {new: true, useFindAndModify: false, runValidators: true}, (err, updatedCode) =>
+    offCode.findOneAndUpdate({_id: off_code_id}, {$inc: {usage: 1}, $push: {users_who_use: user_id}}, {new: true, useFindAndModify: false, runValidators: true}, (err, updatedCode) =>
     {
         if (err || !updatedCode) console.log(err || "didn't find code")
     })
@@ -62,7 +62,7 @@ const addOffCode = (req, res) =>
 {
     if (req.headers.authorization.role === "admin")
     {
-        delete req.body.users_who_user
+        delete req.body.users_who_use
         delete req.body.usage
         if (req.body.expire_date && !isNaN(req.body.expire_date)) req.body.expire_date = new Date().setDate(new Date().getDate() + parseInt(req.body.expire_date))
         else delete req.body.expire_date

@@ -21,7 +21,7 @@ const offCodeModel = new schema({
         enum: ["fix", "percent"],
         default: "fix",
     },
-    users_who_user: {
+    users_who_use: {
         type: [schema.Types.ObjectId],
         ref: "user",
         default: [],

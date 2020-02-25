@@ -1,8 +1,10 @@
 import mongoose from "mongoose"
 import viewModel from "../models/viewModel"
 import userModel from "../models/userModel"
+import userVideoPackRelationModel from "../models/userVideoPackRelationModel"
 
 const view = mongoose.model("view", viewModel)
+const userVideoPackRelation = mongoose.model("userVideoPack", userVideoPackRelationModel)
 const user = mongoose.model("user", userModel)
 
 const addView = (req, res) =>
@@ -20,7 +22,14 @@ const getViews = (req, res) =>
 {
     if (req.headers.authorization && req.headers.authorization.role === "admin")
         view.find(
-            {user_id: {$nin: ["5da0cc1e8088bb5a41e40eff", "5da0e75a7d95bc0b30c492ca", "5da0e8d67d95bc0b30c492cb", "5da2eec47d95bc0b30c492cf", "5dc2ac8955a4e622fe895a92", "5e430d93dec1c036332cf926"]}},
+            {
+                user_id: {
+                    $nin: [
+                        "5da0cc1e8088bb5a41e40eff", "5da0e75a7d95bc0b30c492ca", "5da0e8d67d95bc0b30c492cb",
+                        "5da2eec47d95bc0b30c492cf", "5dc2ac8955a4e622fe895a92", "5e430d93dec1c036332cf926",
+                    ],
+                },
+            },
             null,
             null,
             (err, views) =>
@@ -28,12 +37,14 @@ const getViews = (req, res) =>
                 if (err) res.status(500).send(err)
                 else
                 {
+                    let allBuyCount = 0
                     let allPagesCount = 0
                     let allPages = {}
                     let allVideosCount = 0
                     let allVideos = {}
                     let allSignUpCount = 0
 
+                    let todayBuyCount = 0
                     let todayPagesCount = 0
                     let todayPages = {}
                     let todayVideosCount = 0
@@ -78,10 +89,28 @@ const getViews = (req, res) =>
                                         else
                                         {
                                             allSignUpCount = allSignUp
-                                            res.send({allSignUpCount, allPagesCount, allPages, allVideosCount, allVideos, todaySignUpCount, todaySignUp, todayPagesCount, todayPages, todayVideosCount, todayVideos})
+                                            userVideoPackRelation.countDocuments({created_date: {$lt: new Date(), $gte: new Date().setDate(new Date().getDate() - 1)}}, (err, todayBuy) =>
+                                            {
+                                                if (err) res.status(500).send(err)
+                                                else
+                                                {
+                                                    todayBuyCount = todayBuy
+                                                    userVideoPackRelation.countDocuments(null, (err, allBuy) =>
+                                                    {
+                                                        if (err) res.status(500).send(err)
+                                                        else
+                                                        {
+                                                            allBuyCount = allBuy
+                                                            res.send({
+                                                                allSignUpCount, allPagesCount, allPages, allVideosCount, allVideos, allBuyCount,
+                                                                todaySignUpCount, todaySignUp, todayPagesCount, todayPages, todayVideosCount, todayVideos, todayBuyCount,
+                                                            })
+                                                        }
+                                                    })
+                                                }
+                                            })
                                         }
                                     })
-
                             }
                         })
                 }
