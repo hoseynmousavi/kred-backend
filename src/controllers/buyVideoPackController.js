@@ -4,6 +4,7 @@ import axios from "axios"
 import buyVideoPackModel from "../models/buyVideoPackModel"
 import userVideoPackRelationController from "./userVideoPackRelationController"
 import offCodeController from "./offCodeController"
+import data from "../data"
 
 const buyVideoPack = mongoose.model("buyVideoPack", buyVideoPackModel)
 
@@ -67,7 +68,7 @@ const shopVideoPack = ({user_id, video_pack_id, price, off_code_id, res}) =>
                     name: user_id,
                     callback: "https://restful.kred.ir/payment",
                 },
-                {headers: {"X-API-KEY": "d67fb421-565f-4fd2-8ca7-e4e8c3067e7f"}})
+                {headers: {"X-API-KEY": data.idPayKey}})
                 .then((response) =>
                 {
                     if (response.status === 201)
@@ -104,7 +105,7 @@ const returnAfterPayment = (req, res) =>
                 order_id,
                 id,
             },
-            {headers: {"X-API-KEY": "d67fb421-565f-4fd2-8ca7-e4e8c3067e7f"}})
+            {headers: {"X-API-KEY": data.idPayKey}})
             .then((response) =>
             {
                 if (response.status === 200)
