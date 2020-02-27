@@ -14,7 +14,24 @@ const getConversations = (req, res) =>
     conversation.find(null, null, {sort: "-created_date", skip, limit}, (err, conversations) =>
     {
         if (err) res.status(500).send(err)
-        else res.send(conversations)
+        else
+        {
+            if (req.headers.authorization)
+            {
+                const user_id = req.headers.authorization._id
+                like.find({user_id, conversation_id: {$in: conversations.reduce((sum, conversation) => [...sum, conversation._id], [])}}, (err, likes) =>
+                {
+                    if (err) res.status(500).send(err)
+                    else
+                    {
+                        const conversationsObj = conversations.reduce((sum, conversation) => ({...sum, [conversation._id]: {...conversation.toJSON()}}), {})
+                        likes.forEach(like => conversationsObj[like.conversation_id].is_liked = true)
+                        res.send(Object.values(conversationsObj))
+                    }
+                })
+            }
+            else res.send(conversations)
+        }
     })
 }
 

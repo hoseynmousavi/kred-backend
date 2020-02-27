@@ -1,5 +1,6 @@
 import mongoose from "mongoose"
 import offCodeModel from "../models/offCodeModel"
+import userController from "./userController"
 
 const offCode = mongoose.model("offCode", offCodeModel)
 
@@ -58,6 +59,42 @@ const useOffCode = ({off_code_id, user_id}) =>
     })
 }
 
+const getOffCodes = (req, res) =>
+{
+    if (req.headers.authorization.role === "admin")
+    {
+        offCode.find(null, (err, offCodes) =>
+        {
+            res.send(offCodes.reverse())
+        })
+    }
+    else res.status(403).send({message: "don't have permission babe!"})
+}
+
+const getOffCodeConsumers = (req, res) =>
+{
+    if (req.headers.authorization.role === "admin")
+    {
+        const {code_id} = req.params
+        if (code_id)
+        {
+            offCode.findOne({_id: code_id}, (err, takenOffCode) =>
+            {
+                if (err) res.status(500).send(err)
+                else if (!takenOffCode) res.status(404).send({message: "not found!"})
+                else
+                {
+                    userController.getUsers({condition: {_id: {$in: takenOffCode.users_who_use}}})
+                        .then(result => res.send(result.users))
+                        .catch(result => res.status(result.status || 500).send(result.err))
+                }
+            })
+        }
+        else res.status(400).send({message: "send code_id!"})
+    }
+    else res.status(403).send({message: "don't have permission babe!"})
+}
+
 const addOffCode = (req, res) =>
 {
     if (req.headers.authorization.role === "admin")
@@ -71,10 +108,7 @@ const addOffCode = (req, res) =>
         newOffCode.save((err, createdCode) =>
         {
             if (err) res.status(500).send(err)
-            else
-            {
-                res.send(createdCode)
-            }
+            else res.send(createdCode)
         })
     }
     else res.status(403).send({message: "don't have permission babe!"})
@@ -85,6 +119,8 @@ const offCodeController = {
     validateCode,
     addOffCode,
     useOffCode,
+    getOffCodes,
+    getOffCodeConsumers,
 }
 
 export default offCodeController

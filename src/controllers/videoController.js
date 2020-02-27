@@ -3,6 +3,20 @@ import videoModel from "../models/videoModel"
 
 const video = mongoose.model("video", videoModel)
 
+const getFreeVideos = (req, res) =>
+{
+    video.find(
+        {is_deleted: false, is_free: true},
+        "title video_url subtitle_url poster",
+        null,
+        (err, freeVideos) =>
+        {
+            if (err) res.status(500).send(err)
+            else res.send(freeVideos)
+        },
+    )
+}
+
 const getVideos = ({videoPackCategoryId}) =>
 {
     return new Promise((resolve, reject) =>
@@ -59,6 +73,7 @@ const videoController = {
     getVideos,
     addNewVideo,
     getVideoBySubtitleUrl,
+    getFreeVideos,
 }
 
 export default videoController

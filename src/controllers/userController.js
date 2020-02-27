@@ -5,6 +5,18 @@ import verificationCodeController from "./verificationCodeController"
 
 const user = mongoose.model("user", userModel)
 
+const getUsers = ({condition}) =>
+{
+    return new Promise((resolve, reject) =>
+    {
+        user.find({...condition}, (err, users) =>
+        {
+            if (err) reject({status: 500, err})
+            else resolve({status: 200, users})
+        })
+    })
+}
+
 const phoneCheck = (req, res) =>
 {
     const {phone} = req.body
@@ -81,6 +93,7 @@ const userController = {
     userLogin,
     updateUserById,
     phoneCheck,
+    getUsers,
 }
 
 export default userController

@@ -20,7 +20,8 @@ const addHeaderAndCheckPermissions = (app) =>
             (req.originalUrl.slice(0, 13) === "/conversation" && req.method === "GET") ||
             (req.originalUrl.slice(0, 5) === "/city" && req.method === "GET") ||
             (req.originalUrl.slice(0, 16) === "/media/pictures/" && req.method === "GET") ||
-            (req.originalUrl.slice(0, 6) === "/video" && req.method === "GET")
+            (req.originalUrl.slice(0, 6) === "/video" && req.method === "GET") ||
+            (req.originalUrl.slice(0, 11) === "/subtitles/" && req.method === "GET")
         )
         {
             if (req.headers.authorization)

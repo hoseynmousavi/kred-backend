@@ -13,6 +13,11 @@ const userPackRelationModel = new schema({
         ref: "videoPack",
         required: "Enter video_pack_id!",
     },
+    buy_video_pack_id: {
+        type: schema.Types.ObjectId,
+        ref: "buyVideoPack",
+        required: "Enter buy_video_pack_id!",
+    },
     created_date: {
         type: Date,
         default: Date.now,

@@ -115,7 +115,7 @@ const returnAfterPayment = (req, res) =>
                         if (err || !updatedOrder) res.redirect("https://www.kred.ir/payment/fail")
                         else
                         {
-                            userVideoPackRelationController.addUserVideoPackPermission({video_pack_id: updatedOrder.video_pack_id, user_id: updatedOrder.user_id})
+                            userVideoPackRelationController.addUserVideoPackPermission({video_pack_id: updatedOrder.video_pack_id, user_id: updatedOrder.user_id, buy_video_pack_id: updatedOrder._id})
                                 .then(() =>
                                 {
                                     res.redirect("https://www.kred.ir/payment/success")
@@ -140,9 +140,22 @@ const returnAfterPayment = (req, res) =>
     else res.redirect("https://www.kred.ir/payment/fail")
 }
 
+const getBuyVideoPacks = ({condition}) =>
+{
+    return new Promise((resolve, reject) =>
+    {
+        buyVideoPack.find({...condition}, (err, buyVideoPacks) =>
+        {
+            if (err) reject({status: 500, err})
+            else resolve({status: 200, buyVideoPacks})
+        })
+    })
+}
+
 const buyVideoPackController = {
     getLinkForPay,
     returnAfterPayment,
+    getBuyVideoPacks,
 }
 
 export default buyVideoPackController
