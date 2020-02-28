@@ -46,8 +46,12 @@ const addNewUser = (req, res) =>
                 else
                 {
                     const user = createdUser.toJSON()
-                    tokenHelper.encodeToken({phone: user.phone, _id: user._id, role: user.role})
-                        .then((token) => res.send({...user, token}))
+                    tokenHelper.encodeToken({phone: user.phone, _id: user._id, role: user.role, password: user.password})
+                        .then((token) =>
+                        {
+                            delete user.password
+                            res.send({...user, token})
+                        })
                         .catch((err) => res.status(500).send({message: err}))
                 }
             })
@@ -67,9 +71,45 @@ const userLogin = (req, res) =>
         else
         {
             const user = takenUser.toJSON()
-            tokenHelper.encodeToken({phone: user.phone, _id: user._id, role: user.role})
-                .then((token) => res.send({...user, token}))
+            tokenHelper.encodeToken({phone: user.phone, _id: user._id, role: user.role, password: user.password})
+                .then((token) =>
+                {
+                    delete user.password
+                    res.send({...user, token})
+                })
                 .catch((err) => res.status(500).send({message: err}))
+        }
+    })
+}
+
+const verifyToken = ({_id, role, password, phone}) =>
+{
+    return new Promise((resolve, reject) =>
+    {
+        if (_id && role && password && phone)
+        {
+            user.findOne({phone, _id, role, password}, (err, takenUser) =>
+            {
+                if (err) reject({status: 500, err})
+                else if (!takenUser) reject({status: 403, err: {message: "token is not valid!"}})
+                else resolve({status: 200, err: {message: "it's valid babe!"}})
+            })
+        }
+        else reject({status: 403, err: {message: "token is not valid!"}})
+    })
+}
+
+const verifyTokenRoute = (req, res) =>
+{
+    const {_id} = req.headers.authorization
+    user.findById(_id, (err, takenUser) =>
+    {
+        if (err) res.status(500).send(err)
+        else
+        {
+            const user = takenUser.toJSON()
+            delete user.password
+            res.send({...user})
         }
     })
 }
@@ -94,6 +134,8 @@ const userController = {
     updateUserById,
     phoneCheck,
     getUsers,
+    verifyToken,
+    verifyTokenRoute,
 }
 
 export default userController

@@ -105,11 +105,17 @@ const addNewExchange = (req, res) =>
                         categories.forEach(item => new exchangeCategory({category_id: item, exchange_id: createdExchange._id}).save())
                         if (req.headers.authorization.role !== "admin")
                         {
-                            mailHelper.sendMail({
-                                subject: "آگهی جدید داریم!",
-                                text: `آگهی جدید : ${createdExchange.title}`,
-                                receivers: "aidin.sh1377@gmail.com, miri1888@gmail.com, erfanv1@gmail.com, eziaie1998@gmail.com, zmahramian@gmail.com, hoseyn.mousavi78@gmail.com",
-                            })
+                            const mails = ["aidin.sh1377@gmail.com", "miri1888@gmail.com", "erfanv1@gmail.com", "eziaie1998@gmail.com", "zmahramian@gmail.com", "hoseyn.mousavi78@gmail.com"]
+                            for (let i = 0; i < mails.length; i++)
+                            {
+                                setTimeout(() =>
+                                        mailHelper.sendMail({
+                                            subject: "آگهی جدید داریم!",
+                                            text: `آگهی جدید : ${createdExchange.title}`,
+                                            receivers: mails[i],
+                                        })
+                                    , i * 5000)
+                            }
                         }
                     }
                 })

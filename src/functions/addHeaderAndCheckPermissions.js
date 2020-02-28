@@ -46,7 +46,7 @@ const addHeaderAndCheckPermissions = (app) =>
                         req.headers.authorization = {...payload}
                         next()
                     })
-                    .catch((err) => res.status(401).send(err))
+                    .catch((result) => res.status(result.status || 403).send(result.err))
             }
             else res.status(401).send({message: "send token!"})
         }
