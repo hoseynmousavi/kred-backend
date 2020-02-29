@@ -46,7 +46,7 @@ const addNewUser = (req, res) =>
                 else
                 {
                     const user = createdUser.toJSON()
-                    tokenHelper.encodeToken({phone: user.phone, _id: user._id, role: user.role, password: user.password})
+                    tokenHelper.encodeToken({_id: user._id, password: user.password})
                         .then((token) =>
                         {
                             delete user.password
@@ -71,7 +71,7 @@ const userLogin = (req, res) =>
         else
         {
             const user = takenUser.toJSON()
-            tokenHelper.encodeToken({phone: user.phone, _id: user._id, role: user.role, password: user.password})
+            tokenHelper.encodeToken({_id: user._id, password: user.password})
                 .then((token) =>
                 {
                     delete user.password
@@ -82,17 +82,17 @@ const userLogin = (req, res) =>
     })
 }
 
-const verifyToken = ({_id, role, password, phone}) =>
+const verifyToken = ({_id, password}) =>
 {
     return new Promise((resolve, reject) =>
     {
-        if (_id && role && password && phone)
+        if (_id && password)
         {
-            user.findOne({phone, _id, role, password}, (err, takenUser) =>
+            user.findOne({_id, password}, (err, takenUser) =>
             {
                 if (err) reject({status: 500, err})
                 else if (!takenUser) reject({status: 403, err: {message: "token is not valid!"}})
-                else resolve({status: 200, err: {message: "it's valid babe!"}})
+                else resolve({status: 200, err: {message: "it's valid babe!"}, user: takenUser.toJSON()})
             })
         }
         else reject({status: 403, err: {message: "token is not valid!"}})
@@ -116,15 +116,30 @@ const verifyTokenRoute = (req, res) =>
 
 const updateUserById = (req, res) =>
 {
-    // TODO Hoseyn check token role then let them update even these things
     delete req.body.created_date
     delete req.body.role
     delete req.body.email_verified
     delete req.body.phone_verified
+    delete req.body.phone
+
     user.findOneAndUpdate({_id: req.headers.authorization._id}, req.body, {new: true, useFindAndModify: false, runValidators: true}, (err, updatedUser) =>
     {
         if (err) res.status(400).send(err)
-        else res.send(updatedUser)
+        else
+        {
+            if (req.body.password)
+            {
+                const user = updatedUser.toJSON()
+                tokenHelper.encodeToken({_id: user._id, password: user.password})
+                    .then((token) =>
+                    {
+                        delete user.password
+                        res.send({...user, token})
+                    })
+                    .catch((err) => res.status(500).send({message: err}))
+            }
+            else res.send(updatedUser)
+        }
     })
 }
 

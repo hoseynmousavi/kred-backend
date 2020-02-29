@@ -16,6 +16,8 @@ const getExchanges = (req, res) =>
     const options = {sort: "-created_date", skip, limit}
     const fields = "title price lined telegram whatsapp phone description picture city_id user_id created_date"
 
+    if (req.query.user_id) query.user_id = req.query.user_id
+
     if (req.query.searchTitle) query.title = new RegExp(req.query.searchTitle)
 
     if (req.query.searchCategories)
@@ -168,9 +170,9 @@ const updateExchangeById = (req, res) =>
 
 const deleteExchangeById = (req, res) =>
 {
-    exchange.deleteOne({user_id: req.headers.authorization._id, _id: req.params.exchangeId}, (err) =>
+    exchange.findOneAndUpdate({user_id: req.headers.authorization._id, _id: req.params.exchangeId}, {is_deleted: true}, {new: true, useFindAndModify: false, runValidators: true}, (err, _) =>
     {
-        if (err) res.status(400).send(err)
+        if (err) res.status(500).send(err)
         else res.send({message: "exchange deleted successfully"})
     })
 }
