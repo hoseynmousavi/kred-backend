@@ -152,10 +152,38 @@ const getBuyVideoPacks = ({condition}) =>
     })
 }
 
+const addBuyVideoForAdmin = (req, res) =>
+{
+    if (req.headers.authorization.role === "admin")
+    {
+        const {user_id, video_pack_id, price} = req.body
+        if (user_id && video_pack_id && price)
+        {
+            const newBuyVideoPack = new buyVideoPack({is_done_successful: true, user_id, video_pack_id, price, created_by_admin: true})
+            newBuyVideoPack.save((err, createdOrder) =>
+            {
+                if (err) res.status(500).send(err)
+                else
+                {
+                    userVideoPackRelationController.addUserVideoPackPermission({video_pack_id, user_id, buy_video_pack_id: createdOrder._id})
+                        .then(() =>
+                        {
+                            res.send({message: "done admin"})
+                        })
+                        .catch(() => res.status(500).send())
+                }
+            })
+        }
+        else res.status(400).send({message: "please send user_id, video_pack_id, price"})
+    }
+    else res.status(403).send({message: "don't have permission babe"})
+}
+
 const buyVideoPackController = {
     getLinkForPay,
     returnAfterPayment,
     getBuyVideoPacks,
+    addBuyVideoForAdmin,
 }
 
 export default buyVideoPackController

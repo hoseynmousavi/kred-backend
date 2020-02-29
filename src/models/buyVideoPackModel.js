@@ -37,6 +37,10 @@ const buyVideoPackModel = new schema({
     payment_successful_date: {
         type: String,
     },
+    created_by_admin: {
+        type: Boolean,
+        default: false,
+    },
     created_date: {
         type: Date,
         default: Date.now,
