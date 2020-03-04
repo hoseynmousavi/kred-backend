@@ -1,11 +1,10 @@
 import mongoose from "mongoose"
 import viewModel from "../models/viewModel"
-import userModel from "../models/userModel"
 import userVideoPackRelationModel from "../models/userVideoPackRelationModel"
+import userController from "./userController"
 
 const view = mongoose.model("view", viewModel)
 const userVideoPackRelation = mongoose.model("userVideoPack", userVideoPackRelationModel)
-const user = mongoose.model("user", userModel)
 
 const addView = (req, res) =>
 {
@@ -73,46 +72,40 @@ const getViews = (req, res) =>
                             }
                         }
                     })
-                    user.find(
-                        {created_date: {$lt: new Date(), $gte: new Date().setDate(new Date().getDate() - 1)}},
-                        (err, todaySignUp) =>
+
+                    userController.getUsers({condition: {created_date: {$lt: new Date(), $gte: new Date().setDate(new Date().getDate() - 1)}}})
+                        .then(result =>
                         {
-                            if (err) res.status(500).send(err)
-                            else
-                            {
-                                todaySignUpCount = todaySignUp.length
-                                user.countDocuments(
-                                    null,
-                                    (err, allSignUp) =>
+                            const todaySignUp = result.users
+                            todaySignUpCount = todaySignUp.length
+                            userController.getUsersCount({})
+                                .then(resultCount =>
+                                {
+                                    allSignUpCount = resultCount.users
+                                    userVideoPackRelation.countDocuments({created_date: {$lt: new Date(), $gte: new Date().setDate(new Date().getDate() - 1)}}, (err, todayBuy) =>
                                     {
                                         if (err) res.status(500).send(err)
                                         else
                                         {
-                                            allSignUpCount = allSignUp
-                                            userVideoPackRelation.countDocuments({created_date: {$lt: new Date(), $gte: new Date().setDate(new Date().getDate() - 1)}}, (err, todayBuy) =>
+                                            todayBuyCount = todayBuy
+                                            userVideoPackRelation.countDocuments(null, (err, allBuy) =>
                                             {
                                                 if (err) res.status(500).send(err)
                                                 else
                                                 {
-                                                    todayBuyCount = todayBuy
-                                                    userVideoPackRelation.countDocuments(null, (err, allBuy) =>
-                                                    {
-                                                        if (err) res.status(500).send(err)
-                                                        else
-                                                        {
-                                                            allBuyCount = allBuy
-                                                            res.send({
-                                                                allSignUpCount, allPagesCount, allPages, allVideosCount, allVideos, allBuyCount,
-                                                                todaySignUpCount, todaySignUp, todayPagesCount, todayPages, todayVideosCount, todayVideos, todayBuyCount,
-                                                            })
-                                                        }
+                                                    allBuyCount = allBuy
+                                                    res.send({
+                                                        allSignUpCount, allPagesCount, allPages, allVideosCount, allVideos, allBuyCount,
+                                                        todaySignUpCount, todaySignUp, todayPagesCount, todayPages, todayVideosCount, todayVideos, todayBuyCount,
                                                     })
                                                 }
                                             })
                                         }
                                     })
-                            }
+                                })
+                                .catch(result => res.status(result.status).send(result.err))
                         })
+                        .catch(result => res.status(result.status).send(result.err))
                 }
             },
         )

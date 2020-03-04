@@ -5,6 +5,18 @@ import buyVideoPackController from "./buyVideoPackController"
 
 const userVideoPackRelation = mongoose.model("userVideoPack", userVideoPackRelationModel)
 
+const getPermissionsFunc = ({condition}) =>
+{
+    return new Promise((resolve, reject) =>
+    {
+        userVideoPackRelation.find({...condition}, (err, relations) =>
+        {
+            if (err) reject({status: 500, err})
+            else resolve({status: 200, relations})
+        })
+    })
+}
+
 const addUserVideoPackPermission = ({user_id, video_pack_id, buy_video_pack_id}) =>
 {
     return new Promise((resolve, reject) =>
@@ -60,6 +72,7 @@ const getUserVideoPack = (req, res) =>
 const userVideoPackRelationController = {
     addUserVideoPackPermission,
     getUserVideoPack,
+    getPermissionsFunc,
 }
 
 export default userVideoPackRelationController

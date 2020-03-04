@@ -2,6 +2,7 @@ import mongoose from "mongoose"
 import axios from "axios"
 import verificationCodeModel from "../models/verificationCodeModel"
 import data from "../data"
+import userController from "./userController"
 
 const verificationCode = mongoose.model("verificationCode", verificationCodeModel)
 
@@ -10,30 +11,35 @@ const sendVerificationCode = (req, res) =>
     const {phone} = req.body
     if (phone && phone.length === 11 && !isNaN(phone))
     {
-        verificationCode.findOne({phone}, (err, takenCode) =>
-        {
-            if (err) res.status(500).send(err)
-            else if (takenCode) res.send({message: "ok"})
-            else
+        userController.userExist({phone})
+            .then(() => res.status(400).send({message: "user exist!"}))
+            .catch(() =>
             {
-                const code = Math.floor(Math.random() * 8999) + 1000
-                axios.get(`https://api.kavenegar.com/v1/${data.kavenegarKey}/verify/lookup.json?receptor=${phone}&token=${code}&template=phone-verify`)
-                    .then((response) =>
+                verificationCode.findOne({phone}, (err, takenCode) =>
+                {
+                    if (err) res.status(500).send(err)
+                    else if (takenCode) res.send({message: "ok"})
+                    else
                     {
-                        if (response.data.return.status === 200)
-                        {
-                            const newVerificationCode = new verificationCode({phone, code})
-                            newVerificationCode.save((err, _) =>
+                        const code = Math.floor(Math.random() * 8999) + 1000
+                        axios.get(`https://api.kavenegar.com/v1/${data.kavenegarKey}/verify/lookup.json?receptor=${phone}&token=${code}&template=phone-verify`)
+                            .then((response) =>
                             {
-                                if (err) res.status(500).send(err)
-                                else res.send({message: "ok"})
+                                if (response.data.return.status === 200)
+                                {
+                                    const newVerificationCode = new verificationCode({phone, code})
+                                    newVerificationCode.save((err, _) =>
+                                    {
+                                        if (err) res.status(500).send(err)
+                                        else res.send({message: "ok"})
+                                    })
+                                }
+                                else res.status(500).send({message: "kavenegar err!"})
                             })
-                        }
-                        else res.status(500).send({message: "kavenegar err!"})
-                    })
-                    .catch(() => res.status(500).send({message: "kavenegar err!"}))
-            }
-        })
+                            .catch(() => res.status(500).send({message: "kavenegar err!"}))
+                    }
+                })
+            })
     }
     else res.status(400).send({message: "send an ok phone!"})
 }

@@ -1,7 +1,7 @@
 import path from "path"
 import videoController from "../controllers/videoController"
 import videoPackCategoryController from "../controllers/videoPackCategoryController"
-import videoPackController from "../controllers/videoPackController"
+import userVideoPackRelationController from "../controllers/userVideoPackRelationController"
 
 const fileRouter = (app, dirname) =>
 {
@@ -32,7 +32,7 @@ const fileRouter = (app, dirname) =>
                         videoPackCategoryController.getVideoPackCategoryByVideo({videoPackCategoryId: resultVideo.video.video_pack_category_id})
                             .then((resultCategory) =>
                             {
-                                videoPackController.getPermissionsFunc({condition: {user_id: req.headers.authorization._id, video_pack_id: resultCategory.videoPackCategory.video_pack_id}})
+                                userVideoPackRelationController.getPermissionsFunc({condition: {user_id: req.headers.authorization._id, video_pack_id: resultCategory.videoPackCategory.video_pack_id}})
                                     .then((resultPermission) =>
                                     {
                                         if (resultPermission.relations && resultPermission.relations.length > 0) res.sendFile(path.join(dirname, `/subtitles/${req.params.file}`))

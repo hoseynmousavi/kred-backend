@@ -14,6 +14,9 @@ const userRouter = (app) =>
 
     app.route("/user/verify-token")
         .post(userController.verifyTokenRoute)
+
+    app.route("/user/forget-password")
+        .post(userController.sendForgottenPassword)
 }
 
 export default userRouter

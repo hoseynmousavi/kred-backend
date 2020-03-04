@@ -15,7 +15,7 @@ const getLinkForPay = (req, res) =>
 
     if (user_id && video_pack_id)
     {
-        videoPackController.getPermissionsFunc({condition: {user_id, video_pack_id}})
+        userVideoPackRelationController.getPermissionsFunc({condition: {user_id, video_pack_id}})
             .then((resultPermission) =>
             {
                 if (resultPermission.relations && resultPermission.relations.length > 0) res.status(400).send({message: "bad request!"})

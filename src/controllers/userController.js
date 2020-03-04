@@ -2,6 +2,8 @@ import mongoose from "mongoose"
 import userModel from "../models/userModel"
 import tokenHelper from "../functions/tokenHelper"
 import verificationCodeController from "./verificationCodeController"
+import axios from "axios"
+import data from "../data"
 
 const user = mongoose.model("user", userModel)
 
@@ -10,6 +12,18 @@ const getUsers = ({condition}) =>
     return new Promise((resolve, reject) =>
     {
         user.find({...condition}, (err, users) =>
+        {
+            if (err) reject({status: 500, err})
+            else resolve({status: 200, users})
+        })
+    })
+}
+
+const getUsersCount = ({condition}) =>
+{
+    return new Promise((resolve, reject) =>
+    {
+        user.countDocuments({...condition}, (err, users) =>
         {
             if (err) reject({status: 500, err})
             else resolve({status: 200, users})
@@ -143,6 +157,41 @@ const updateUserById = (req, res) =>
     })
 }
 
+const sendForgottenPassword = (req, res) =>
+{
+    const {phone} = req.body
+    if (phone && phone.length === 11 && !isNaN(phone))
+    {
+        userExist({phone})
+            .then(result =>
+            {
+                const {user} = result
+                axios.get(encodeURI(`https://api.kavenegar.com/v1/${data.kavenegarKey}/verify/lookup.json?receptor=${phone}&token=${user.name ? user.name.split(" ")[0] : "کاربر"}&token2=${user.password}&template=forget-password`))
+                    .then((response) =>
+                    {
+                        if (response.data.return.status === 200) res.send({message: "ok"})
+                        else res.status(500).send({message: "kavenegar err!"})
+                    })
+                    .catch(() => res.status(500).send({message: "kavenegar err!"}))
+            })
+            .catch(result => res.status(result.status || 500).send(result.err))
+    }
+    else res.status(400).send({message: "send an ok phone!"})
+}
+
+const userExist = ({phone}) =>
+{
+    return new Promise((resolve, reject) =>
+    {
+        user.findOne({phone}, (err, takenUser) =>
+        {
+            if (err) reject({status: 500, err})
+            else if (!takenUser) reject({status: 404, err: {message: "user not found!"}})
+            else resolve({status: 200, user: takenUser.toJSON()})
+        })
+    })
+}
+
 const userController = {
     addNewUser,
     userLogin,
@@ -151,6 +200,9 @@ const userController = {
     getUsers,
     verifyToken,
     verifyTokenRoute,
+    sendForgottenPassword,
+    getUsersCount,
+    userExist,
 }
 
 export default userController

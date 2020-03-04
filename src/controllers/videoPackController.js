@@ -1,23 +1,10 @@
 import mongoose from "mongoose"
 import videoPackModel from "../models/videoPackModel"
-import userVideoPackRelationModel from "../models/userVideoPackRelationModel"
 import videoPackCategoryController from "./videoPackCategoryController"
 import videoController from "./videoController"
+import userVideoPackRelationController from "./userVideoPackRelationController"
 
-const userVideoPackRelation = mongoose.model("userVideoPack", userVideoPackRelationModel)
 const videoPack = mongoose.model("videoPack", videoPackModel)
-
-const getPermissionsFunc = ({condition}) =>
-{
-    return new Promise((resolve, reject) =>
-    {
-        userVideoPackRelation.find({...condition}, (err, relations) =>
-        {
-            if (err) reject({status: 500, err})
-            else resolve({status: 200, relations})
-        })
-    })
-}
 
 const getVideoPacks = (req, res) =>
 {
@@ -46,7 +33,7 @@ const getVideoPacks = (req, res) =>
                     }
                     else
                     {
-                        getPermissionsFunc({condition: {user_id: req.headers.authorization._id}})
+                        userVideoPackRelationController.getPermissionsFunc({condition: {user_id: req.headers.authorization._id}})
                             .then((result) =>
                             {
                                 const videoPacksObj = videoPacks.reduce((sum, pack) => ({...sum, [pack._id]: {...pack.toJSON()}}), {})
@@ -97,7 +84,7 @@ const getVideoPackById = (req, res) =>
                                 }
                                 else
                                 {
-                                    getPermissionsFunc({condition: {user_id: req.headers.authorization._id, video_pack_id: videoPackJson._id}})
+                                    userVideoPackRelationController.getPermissionsFunc({condition: {user_id: req.headers.authorization._id, video_pack_id: videoPackJson._id}})
                                         .then((result) =>
                                             res.send({...videoPackJson, have_permission: result.relations && result.relations.length > 0, categories: Object.values(videoPackCategories)}),
                                         )
@@ -161,7 +148,6 @@ const videoPackController = {
     getVideoPacks,
     addNewVideoPack,
     getVideoPackById,
-    getPermissionsFunc,
     getPureVideoPackById,
 }
 
