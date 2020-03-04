@@ -1,9 +1,9 @@
 import mongoose from "mongoose"
 import axios from "axios"
 import verificationCodeModel from "../models/verificationCodeModel"
+import data from "../data"
 
 const verificationCode = mongoose.model("verificationCode", verificationCodeModel)
-const apiKey = "39572B7445383449645A59492B52307965764C56443956674F4F647736527561526534527770446C30554D3D"
 
 const sendVerificationCode = (req, res) =>
 {
@@ -17,7 +17,7 @@ const sendVerificationCode = (req, res) =>
             else
             {
                 const code = Math.floor(Math.random() * 8999) + 1000
-                axios.get(`https://api.kavenegar.com/v1/${apiKey}/verify/lookup.json?receptor=${phone}&token=${code}&template=phone-verify`)
+                axios.get(`https://api.kavenegar.com/v1/${data.kavenegarKey}/verify/lookup.json?receptor=${phone}&token=${code}&template=phone-verify`)
                     .then((response) =>
                     {
                         if (response.data.return.status === 200)

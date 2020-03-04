@@ -14,6 +14,10 @@ const verificationCodeModel = new schema({
         maxlength: 11,
         required: "Enter Phone!",
     },
+    created_date: {
+        type: Date,
+        default: Date.now,
+    },
 })
 
 export default verificationCodeModel

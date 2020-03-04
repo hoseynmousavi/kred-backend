@@ -166,12 +166,9 @@ const addBuyVideoForAdmin = (req, res) =>
                 else
                 {
                     userVideoPackRelationController.addUserVideoPackPermission({video_pack_id, user_id, buy_video_pack_id: createdOrder._id})
-                        .then(() =>
-                        {
-                            res.send({message: "done admin"})
-                        })
-                        .catch(() => res.status(500).send())
-                }
+                        .then(() => res.send({message: "done admin"}))
+                        .catch((result) => res.status(result.status).send(result.err))
+                } 
             })
         }
         else res.status(400).send({message: "please send user_id, video_pack_id, price"})
