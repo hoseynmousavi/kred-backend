@@ -30,18 +30,18 @@ const addUserVideoPackPermission = ({user_id, video_pack_id, buy_video_pack_id})
     })
 }
 
-const getUserVideoPack = (req, res) =>
+const getTodayUserVideoPack = (req, res) =>
 {
     if (req.headers.authorization.role === "admin")
     {
-        userVideoPackRelation.find(null, (err, userPacks) =>
+        userVideoPackRelation.find({created_date: {$lt: new Date(), $gte: new Date().setDate(new Date().getDate() - 1)}}, (err, userPacks) =>
         {
             if (err) res.status(500).send(err)
             else
             {
                 let userPacksObj = userPacks.reduce((sum, pack) => ({...sum, [pack._id]: {...pack.toJSON()}}), {})
 
-                buyVideoPackController.getBuyVideoPacks({condition: {is_done_successful: true}})
+                buyVideoPackController.getBuyVideoPacks({condition: {is_done_successful: true, created_date: {$lt: new Date(), $gte: new Date().setDate(new Date().getDate() - 1)}}})
                     .then(result =>
                     {
                         const buyVideoPacksObj = result.buyVideoPacks.reduce((sum, buy) => ({...sum, [buy._id]: {...buy.toJSON()}}), {})
@@ -60,9 +60,17 @@ const getUserVideoPack = (req, res) =>
                                 })
                                 res.send(Object.values(userPacksObj))
                             })
-                            .catch(result => res.status(result.status).send(result.err))
+                            .catch(result =>
+                            {
+                                console.log(result.message)
+                                res.status(result.status || 500).send(result.err)
+                            })
                     })
-                    .catch(result => res.status(result.status).send(result.err))
+                    .catch(result =>
+                    {
+                        console.log(result.message)
+                        res.status(result.status || 500).send(result.err)
+                    })
             }
         })
     }
@@ -71,7 +79,7 @@ const getUserVideoPack = (req, res) =>
 
 const userVideoPackRelationController = {
     addUserVideoPackPermission,
-    getUserVideoPack,
+    getTodayUserVideoPack,
     getPermissionsFunc,
 }
 
