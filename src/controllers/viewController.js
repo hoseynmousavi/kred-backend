@@ -83,6 +83,72 @@ const getTodayVideoViews = (req, res) =>
     else res.status(403).send()
 }
 
+const getAllPageViews = (req, res) =>
+{
+    if (req.headers.authorization.role === "admin")
+    {
+        view.find(
+            {
+                user_id: {
+                    $nin: [
+                        "5da0cc1e8088bb5a41e40eff", "5da0e75a7d95bc0b30c492ca", "5da0e8d67d95bc0b30c492cb",
+                        "5da2eec47d95bc0b30c492cf", "5dc2ac8955a4e622fe895a92", "5e430d93dec1c036332cf926",
+                    ],
+                },
+                type: "page",
+            },
+            (err, views) =>
+            {
+                if (err) res.status(500).send(err)
+                else
+                {
+                    let todayPagesCount = 0
+                    let todayPages = {}
+                    views.forEach(item =>
+                    {
+                        todayPagesCount++
+                        todayPages[item.content] ? todayPages[item.content].count++ : todayPages[item.content] = {title: item.content, count: 1}
+                    })
+                    res.send({todayPagesCount, todayPages})
+                }
+            })
+    }
+    else res.status(403).send()
+}
+
+const getAllVideoViews = (req, res) =>
+{
+    if (req.headers.authorization.role === "admin")
+    {
+        view.find(
+            {
+                user_id: {
+                    $nin: [
+                        "5da0cc1e8088bb5a41e40eff", "5da0e75a7d95bc0b30c492ca", "5da0e8d67d95bc0b30c492cb",
+                        "5da2eec47d95bc0b30c492cf", "5dc2ac8955a4e622fe895a92", "5e430d93dec1c036332cf926",
+                    ],
+                },
+                type: "video",
+            },
+            (err, views) =>
+            {
+                if (err) res.status(500).send(err)
+                else
+                {
+                    let todayVideosCount = 0
+                    let todayVideos = {}
+                    views.forEach(item =>
+                    {
+                        todayVideosCount++
+                        todayVideos[item.content] ? todayVideos[item.content].count++ : todayVideos[item.content] = {title: item.content, count: 1}
+                    })
+                    res.send({todayVideosCount, todayVideos})
+                }
+            })
+    }
+    else res.status(403).send()
+}
+
 const getTodaySignUps = (req, res) =>
 {
     if (req.headers.authorization.role === "admin")
@@ -94,11 +160,33 @@ const getTodaySignUps = (req, res) =>
     else res.status(403).send()
 }
 
+const getAllSignUps = (req, res) =>
+{
+    if (req.headers.authorization.role === "admin")
+    {
+        const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
+        const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
+        const options = {sort: "-created_date", skip, limit}
+        userController.getUsers({condition: null, options})
+            .then(result =>
+            {
+                userController.getUsersCount({condition: null})
+                    .then((resultCount) => res.send({users: result.users, count: resultCount.users}))
+                    .catch(result => res.status(result.status).send(result.err))
+            })
+            .catch(result => res.status(result.status).send(result.err))
+    }
+    else res.status(403).send()
+}
+
 const viewController = {
     addView,
     getTodayPageViews,
     getTodayVideoViews,
     getTodaySignUps,
+    getAllPageViews,
+    getAllVideoViews,
+    getAllSignUps,
 }
 
 export default viewController

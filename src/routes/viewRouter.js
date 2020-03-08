@@ -6,6 +6,18 @@ const viewRouter = (app) =>
     app.route("/view")
         .post(viewController.addView)
 
+    app.route("/view/all/page")
+        .get(viewController.getAllPageViews)
+
+    app.route("/view/all/video")
+        .get(viewController.getAllVideoViews)
+
+    app.route("/view/all/sign-up")
+        .get(viewController.getAllSignUps)
+
+    app.route("/view/all/pack-users")
+        .get(userVideoPackRelationController.getAllUserVideoPack)
+
     app.route("/view/today/page")
         .get(viewController.getTodayPageViews)
 

@@ -7,11 +7,11 @@ import data from "../data"
 
 const user = mongoose.model("user", userModel)
 
-const getUsers = ({condition}) =>
+const getUsers = ({condition, options}) =>
 {
     return new Promise((resolve, reject) =>
     {
-        user.find({...condition}, (err, users) =>
+        user.find(condition, null, options, (err, users) =>
         {
             if (err) reject({status: 500, err})
             else resolve({status: 200, users})
@@ -23,7 +23,7 @@ const getUsersCount = ({condition}) =>
 {
     return new Promise((resolve, reject) =>
     {
-        user.countDocuments({...condition}, (err, users) =>
+        user.countDocuments(condition, (err, users) =>
         {
             if (err) reject({status: 500, err})
             else resolve({status: 200, users})
