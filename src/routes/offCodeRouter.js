@@ -9,6 +9,9 @@ const offCodeRouter = (app) =>
         .get(offCodeController.getOffCodes)
         .post(offCodeController.addOffCode)
 
+    app.route("/off-code/:offCodeId")
+        .delete(offCodeController.deleteOffCode)
+
     app.route("/off-code/users/:code_id")
         .get(offCodeController.getOffCodeConsumers)
 }

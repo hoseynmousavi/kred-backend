@@ -114,6 +114,35 @@ const addOffCode = (req, res) =>
     else res.status(403).send({message: "don't have permission babe!"})
 }
 
+const deleteOffCode = (req, res) =>
+{
+    if (req.headers.authorization.role === "admin")
+    {
+        if (req.params.offCodeId)
+        {
+            offCode.findById(req.params.offCodeId, (err, takenOffCode) =>
+            {
+                if (err) res.status(500).send(err)
+                else if (!takenOffCode) res.status(404).send({message: "didn't found!"})
+                else
+                {
+                    if (takenOffCode.toJSON().usage === 0)
+                    {
+                        offCode.deleteOne({_id: req.params.offCodeId}, (err) =>
+                        {
+                            if (err) res.status(500).send(err)
+                            else res.send({message: "deleted babe"})
+                        })
+                    }
+                    else res.status(400).send({message: "کد وارد شده، سابقه مصرف شدن دارد!"})
+                }
+            })
+        }
+        else res.status(400).send({message: "send offCodeId as param"})
+    }
+    else res.status(403).send({message: "don't have permission babe!"})
+}
+
 const offCodeController = {
     validateCodeFunc,
     validateCode,
@@ -121,6 +150,7 @@ const offCodeController = {
     useOffCode,
     getOffCodes,
     getOffCodeConsumers,
+    deleteOffCode,
 }
 
 export default offCodeController

@@ -170,11 +170,15 @@ const updateExchangeById = (req, res) =>
 
 const deleteExchangeById = (req, res) =>
 {
-    exchange.findOneAndUpdate({user_id: req.headers.authorization._id, _id: req.params.exchangeId}, {is_deleted: true}, {new: true, useFindAndModify: false, runValidators: true}, (err, _) =>
+    if (req.params.exchangeId)
     {
-        if (err) res.status(500).send(err)
-        else res.send({message: "exchange deleted successfully"})
-    })
+        exchange.findOneAndUpdate({user_id: req.headers.authorization._id, _id: req.params.exchangeId}, {is_deleted: true}, {new: true, useFindAndModify: false, runValidators: true}, (err, _) =>
+        {
+            if (err) res.status(500).send(err)
+            else res.send({message: "exchange deleted successfully"})
+        })
+    }
+    else res.status(400).send({message: "send exchangeId as param"})
 }
 
 const exchangeController = {
