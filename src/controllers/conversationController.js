@@ -41,7 +41,23 @@ const getConversationById = (req, res) =>
     {
         if (err) res.status(500).send(err)
         else if (!takenConversation) res.status(404).send({message: "not found!"})
-        else res.send(takenConversation)
+        else
+        {
+            if (req.headers.authorization)
+            {
+                const user_id = req.headers.authorization._id
+                like.findOne({user_id, conversation_id: req.params.conversationId}, (err, takenLike) =>
+                {
+                    if (err) res.status(500).send(err)
+                    else
+                    {
+                        const is_liked = takenLike !== null
+                        res.send({...takenConversation.toJSON(), is_liked})
+                    }
+                })
+            }
+            else res.send(takenConversation)
+        }
     })
 }
 

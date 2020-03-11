@@ -12,7 +12,11 @@ const getFreeVideos = (req, res) =>
         (err, freeVideos) =>
         {
             if (err) res.status(500).send(err)
-            else res.send(freeVideos)
+            else
+            {
+                res.setHeader("Cache-Control", "max-age=604800")
+                res.send(freeVideos)
+            }
         },
     )
 }
