@@ -36,6 +36,9 @@ const exchangeModel = new schema({
     picture: {
         type: String,
     },
+    thumbnail: {
+        type: String,
+    },
     city_id: {
         type: schema.Types.ObjectId,
         required: "Enter city_id!",

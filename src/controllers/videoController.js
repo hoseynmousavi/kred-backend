@@ -5,10 +5,14 @@ const video = mongoose.model("video", videoModel)
 
 const getFreeVideos = (req, res) =>
 {
+    const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 5
+    const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
+    let query = {is_deleted: false, is_free: true}
+    const options = {sort: "-created_date", skip, limit}
     video.find(
-        {is_deleted: false, is_free: true},
+        query,
         "title video_url subtitle_url poster",
-        null,
+        options,
         (err, freeVideos) =>
         {
             if (err) res.status(500).send(err)

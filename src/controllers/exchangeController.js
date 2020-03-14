@@ -14,7 +14,7 @@ const getExchanges = (req, res) =>
     const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
     let query = {is_deleted: false, is_verified: true}
     const options = {sort: "-created_date", skip, limit}
-    const fields = "title price lined telegram whatsapp phone description picture city_id user_id created_date"
+    const fields = "title price lined telegram whatsapp phone description picture thumbnail city_id user_id created_date"
 
     if (req.query.user_id) query.user_id = req.query.user_id
 
@@ -82,48 +82,55 @@ const addNewExchange = (req, res) =>
     else
     {
         const picture = req.files ? req.files.picture : null
-        if (picture)
+        const thumbnail = req.files ? req.files.thumbnail : null
+        if (picture && thumbnail)
         {
-            const picName = new Date().toISOString() + picture.name
+            const date = new Date().toISOString()
+            const picName = date + picture.name
+            const thumbnailName = date + "thumbnail" + picture.name
             picture.mv(`media/pictures/${picName}`, (err) =>
             {
                 if (err) console.log(err)
-                delete req.body.created_date
-                delete req.body.is_deleted
-                delete req.body.user_id
-                req.headers.authorization.role === "admin" ? req.body.is_verified = true : delete req.body.is_verified
-                const newExchange = new exchange({...req.body, picture: `media/pictures/${picName}`, user_id: req.headers.authorization._id})
-                newExchange.save((err, createdExchange) =>
+                thumbnail.mv(`media/pictures/${thumbnailName}`, (errThumb) =>
                 {
-                    if (err)
+                    if (errThumb) console.log(errThumb)
+                    delete req.body.created_date
+                    delete req.body.is_deleted
+                    delete req.body.user_id
+                    req.headers.authorization.role === "admin" ? req.body.is_verified = true : delete req.body.is_verified
+                    const newExchange = new exchange({...req.body, picture: `media/pictures/${picName}`, thumbnail: `media/pictures/${thumbnailName}`, user_id: req.headers.authorization._id})
+                    newExchange.save((err, createdExchange) =>
                     {
-                        console.log(err)
-                        res.status(400).send(err)
-                    }
-                    else
-                    {
-                        res.send(createdExchange)
-                        const categories = JSON.parse(req.body.categories)
-                        categories.forEach(item => new exchangeCategory({category_id: item, exchange_id: createdExchange._id}).save())
-                        if (req.headers.authorization.role !== "admin")
+                        if (err)
                         {
-                            const mails = ["aidin.sh1377@gmail.com", "miri1888@gmail.com", "erfanv1@gmail.com", "eziaie1998@gmail.com", "zmahramian@gmail.com", "hoseyn.mousavi78@gmail.com"]
-                            for (let i = 0; i < mails.length; i++)
+                            console.log(err)
+                            res.status(400).send(err)
+                        }
+                        else
+                        {
+                            res.send(createdExchange)
+                            const categories = JSON.parse(req.body.categories)
+                            categories.forEach(item => new exchangeCategory({category_id: item, exchange_id: createdExchange._id}).save())
+                            if (req.headers.authorization.role !== "admin")
                             {
-                                setTimeout(() =>
-                                        mailHelper.sendMail({
-                                            subject: "آگهی جدید داریم!",
-                                            text: `آگهی جدید : ${createdExchange.title}`,
-                                            receivers: mails[i],
-                                        })
-                                    , i * 5000)
+                                const mails = ["aidin.sh1377@gmail.com", "miri1888@gmail.com", "erfanv1@gmail.com", "eziaie1998@gmail.com", "zmahramian@gmail.com", "hoseyn.mousavi78@gmail.com"]
+                                for (let i = 0; i < mails.length; i++)
+                                {
+                                    setTimeout(() =>
+                                            mailHelper.sendMail({
+                                                subject: "آگهی جدید داریم!",
+                                                text: `آگهی جدید : ${createdExchange.title}`,
+                                                receivers: mails[i],
+                                            })
+                                        , i * 5000)
+                                }
                             }
                         }
-                    }
+                    })
                 })
             })
         }
-        else res.status(400).send({message: "send picture!"})
+        else res.status(400).send({message: "send picture & thumbnail!"})
     }
 }
 

@@ -113,6 +113,18 @@ const getPureVideoPackById = ({videoPackId}) =>
     })
 }
 
+const getVideoPacksFunc = ({condition}) =>
+{
+    return new Promise((resolve, reject) =>
+    {
+        videoPack.find(condition, (err, takenVideoPacks) =>
+        {
+            if (err) reject({status: 500, err})
+            else resolve({status: 200, takenVideoPacks})
+        })
+    })
+}
+
 const addNewVideoPack = (req, res) =>
 {
     if (req.headers.authorization.role === "admin")
@@ -149,6 +161,7 @@ const videoPackController = {
     addNewVideoPack,
     getVideoPackById,
     getPureVideoPackById,
+    getVideoPacksFunc,
 }
 
 export default videoPackController
