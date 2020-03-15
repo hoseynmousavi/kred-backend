@@ -5,7 +5,6 @@ const exchangeRouter = (app) =>
     app.route("/exchange")
         .get(exchangeController.getExchanges)
         .post(exchangeController.addNewExchange)
-        .patch(exchangeController.updateExchangeById)
 
     app.route("/exchange/:exchangeId")
         .get(exchangeController.getExchangeById)

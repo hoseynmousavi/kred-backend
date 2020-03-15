@@ -247,7 +247,7 @@ const getConversationComments = (req, res) =>
                     else
                     {
                         commentsObj = {...commentsObj, ...childs.reduce((sum, comment) => ({...sum, [comment.id]: {...comment.toJSON()}}), {})}
-                        userController.getUsers({projection: "name university", condition: {_id: {$in: [...new Set(Object.values(commentsObj).reduce((sum, comment) => [...sum, comment.user_id], []))]}}})
+                        userController.getUsers({projection: "avatar name university", condition: {_id: {$in: [...new Set(Object.values(commentsObj).reduce((sum, comment) => [...sum, comment.user_id], []))]}}})
                             .then(result =>
                             {
                                 const usersObj = result.users.reduce((sum, user) => ({...sum, [user.id]: {...user.toJSON()}}), {})

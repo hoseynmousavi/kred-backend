@@ -134,47 +134,6 @@ const addNewExchange = (req, res) =>
     }
 }
 
-const updateExchangeById = (req, res) =>
-{
-    // TODO Hoseyn check token role then let them update even these things
-    delete req.body.created_date
-    delete req.body.is_verified
-    delete req.body.is_deleted
-    delete req.body.user_id
-
-    const picture = req.files ? req.files.picture : null
-    if (picture)
-    {
-        const picName = new Date().toISOString() + req.headers.authorization._id
-        picture.mv(`media/pictures/${picName}`, (err) =>
-        {
-            if (err)
-            {
-                res.status(500).send({message: "internal save picture error!"})
-                return false
-            }
-            else
-            {
-                exchange.findOneAndUpdate({user_id: req.headers.authorization._id, _id: req.body._id}, {...req.body, picture: `media/pictures/${picName}`}, {new: true, useFindAndModify: false, runValidators: true}, (err, updatedExchange) =>
-                {
-                    if (err) res.status(400).send(err)
-                    else if (!updatedExchange) res.status(404).send({message: "not found!"})
-                    else res.send(updatedExchange)
-                })
-            }
-        })
-    }
-    else
-    {
-        exchange.findOneAndUpdate({user_id: req.headers.authorization._id, _id: req.body._id}, req.body, {new: true, useFindAndModify: false, runValidators: true}, (err, updatedExchange) =>
-        {
-            if (err) res.status(400).send(err)
-            else if (!updatedExchange) res.status(404).send({message: "not found!"})
-            else res.send(updatedExchange)
-        })
-    }
-}
-
 const deleteExchangeById = (req, res) =>
 {
     if (req.params.exchangeId)
@@ -190,7 +149,6 @@ const deleteExchangeById = (req, res) =>
 
 const exchangeController = {
     getExchanges,
-    updateExchangeById,
     addNewExchange,
     deleteExchangeById,
     getExchangeById,

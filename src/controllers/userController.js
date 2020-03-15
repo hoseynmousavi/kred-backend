@@ -136,25 +136,56 @@ const updateUserById = (req, res) =>
     delete req.body.phone_verified
     delete req.body.phone
 
-    user.findOneAndUpdate({_id: req.headers.authorization._id}, req.body, {new: true, useFindAndModify: false, runValidators: true}, (err, updatedUser) =>
+    const avatar = req.files ? req.files.avatar : null
+    if (avatar)
     {
-        if (err) res.status(400).send(err)
-        else
+        const avatarName = new Date().toISOString() + avatar.name
+        avatar.mv(`media/pictures/${avatarName}`, (err) =>
         {
-            if (req.body.password)
+            if (err) console.log(err)
+            user.findOneAndUpdate({_id: req.headers.authorization._id}, {...req.body, avatar: `/media/pictures/${avatarName}`}, {new: true, useFindAndModify: false, runValidators: true}, (err, updatedUser) =>
             {
-                const user = updatedUser.toJSON()
-                tokenHelper.encodeToken({_id: user._id, password: user.password})
-                    .then((token) =>
+                if (err) res.status(400).send(err)
+                else
+                {
+                    if (req.body.password)
                     {
-                        delete user.password
-                        res.send({...user, token})
-                    })
-                    .catch((err) => res.status(500).send({message: err}))
+                        const user = updatedUser.toJSON()
+                        tokenHelper.encodeToken({_id: user._id, password: user.password})
+                            .then((token) =>
+                            {
+                                delete user.password
+                                res.send({...user, token})
+                            })
+                            .catch((err) => res.status(500).send({message: err}))
+                    }
+                    else res.send(updatedUser)
+                }
+            })
+        })
+    }
+    else
+    {
+        user.findOneAndUpdate({_id: req.headers.authorization._id}, req.body, {new: true, useFindAndModify: false, runValidators: true}, (err, updatedUser) =>
+        {
+            if (err) res.status(400).send(err)
+            else
+            {
+                if (req.body.password)
+                {
+                    const user = updatedUser.toJSON()
+                    tokenHelper.encodeToken({_id: user._id, password: user.password})
+                        .then((token) =>
+                        {
+                            delete user.password
+                            res.send({...user, token})
+                        })
+                        .catch((err) => res.status(500).send({message: err}))
+                }
+                else res.send(updatedUser)
             }
-            else res.send(updatedUser)
-        }
-    })
+        })
+    }
 }
 
 const sendForgottenPassword = (req, res) =>
