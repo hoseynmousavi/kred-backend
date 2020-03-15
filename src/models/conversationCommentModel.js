@@ -13,7 +13,7 @@ const conversationCommentModel = new schema({
     },
     description: {
         type: String,
-        minlength: 1,
+        minlength: 2,
         required: "Enter description!",
     },
     is_deleted: {
@@ -22,7 +22,7 @@ const conversationCommentModel = new schema({
     },
     created_date: {
         type: Date,
-        default: Date.now(),
+        default: Date.now,
     },
 })
 

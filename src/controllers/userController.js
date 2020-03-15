@@ -7,11 +7,11 @@ import data from "../data"
 
 const user = mongoose.model("user", userModel)
 
-const getUsers = ({condition, options}) =>
+const getUsers = ({condition, projection, options}) =>
 {
     return new Promise((resolve, reject) =>
     {
-        user.find(condition, null, options, (err, users) =>
+        user.find(condition, projection, options, (err, users) =>
         {
             if (err) reject({status: 500, err})
             else resolve({status: 200, users})

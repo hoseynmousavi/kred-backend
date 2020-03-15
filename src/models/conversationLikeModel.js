@@ -13,7 +13,7 @@ const conversationLikeModel = new schema({
     },
     created_date: {
         type: Date,
-        default: Date.now(),
+        default: Date.now,
     },
 })
 

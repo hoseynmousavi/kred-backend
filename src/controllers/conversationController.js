@@ -2,6 +2,7 @@ import mongoose from "mongoose"
 import conversationModel from "../models/conversationModel"
 import conversationLikeModel from "../models/conversationLikeModel"
 import conversationCommentModel from "../models/conversationCommentModel"
+import userController from "./userController"
 
 const conversation = mongoose.model("conversation", conversationModel)
 const like = mongoose.model("conversationLike", conversationLikeModel)
@@ -157,6 +158,7 @@ const deleteLike = (req, res) =>
 const addNewComment = (req, res) =>
 {
     delete req.body.created_date
+    delete req.body.is_deleted
     req.body.user_id = req.headers.authorization._id
     const newComment = new comment(req.body)
     newComment.save((err, createdComment) =>
@@ -184,12 +186,27 @@ const addNewComment = (req, res) =>
 
 const getConversationComments = (req, res) =>
 {
-    const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
+    const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 50
     const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
-    comment.find({is_deleted: false, conversation_id: req.params.conversationId}, null, {sort: "-created_date", skip, limit}, (err, comments) =>
+    comment.find({is_deleted: false, conversation_id: req.params.conversationId}, "description created_date user_id", {sort: "-created_date", skip, limit}, (err, comments) =>
     {
         if (err) res.status(400).send(err)
-        else res.send(comments)
+        else
+        {
+            const commentsObj = comments.reduce((sum, comment) => ({...sum, [comment.id]: {...comment.toJSON()}}), {})
+            userController.getUsers({projection: "name university", condition: {_id: {$in: [...new Set(comments.reduce((sum, comment) => [...sum, comment.user_id], []))]}}})
+                .then(result =>
+                {
+                    const usersObj = result.users.reduce((sum, user) => ({...sum, [user.id]: {...user.toJSON()}}), {})
+                    comments.forEach(item =>
+                    {
+                        commentsObj[item.id].user = usersObj[item.user_id]
+                        delete commentsObj[item.id].user_id
+                    })
+                    res.send(Object.values(commentsObj))
+                })
+                .catch(result => res.status(result.status || 500).send(result.err))
+        }
     })
 }
 
