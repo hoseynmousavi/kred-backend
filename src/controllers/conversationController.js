@@ -3,14 +3,16 @@ import conversationModel from "../models/conversationModel"
 import conversationLikeModel from "../models/conversationLikeModel"
 import conversationCommentModel from "../models/conversationCommentModel"
 import userController from "./userController"
+import conversationCommentLikeModel from "../models/conversationCommentLikeModel"
 
 const conversation = mongoose.model("conversation", conversationModel)
-const like = mongoose.model("conversationLike", conversationLikeModel)
 const comment = mongoose.model("conversationComment", conversationCommentModel)
+const like = mongoose.model("conversationLike", conversationLikeModel)
+const commentLike = mongoose.model("conversationCommentLike", conversationCommentLikeModel)
 
 const getConversations = (req, res) =>
 {
-    const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
+    const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 5
     const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
     conversation.find(null, null, {sort: "-created_date", skip, limit}, (err, conversations) =>
     {
@@ -117,11 +119,7 @@ const addNewLike = (req, res) =>
                 {useFindAndModify: false},
                 (err) =>
                 {
-                    if (err)
-                    {
-                        console.log(err)
-                        res.status(500).send(err)
-                    }
+                    if (err) res.status(500).send(err)
                     else res.send(createdLike)
                 },
             )
@@ -142,11 +140,7 @@ const deleteLike = (req, res) =>
                 {useFindAndModify: false},
                 (err) =>
                 {
-                    if (err)
-                    {
-                        console.log(err)
-                        res.status(500).send(err)
-                    }
+                    if (err) res.status(500).send(err)
                     else res.send({message: "like deleted successfully"})
                 },
             )
@@ -155,10 +149,59 @@ const deleteLike = (req, res) =>
     })
 }
 
+const addNewCommentLike = (req, res) =>
+{
+    delete req.body.created_date
+    req.body.user_id = req.headers.authorization._id
+    const newLike = new commentLike(req.body)
+    newLike.save((err, createdLike) =>
+    {
+        if (err) res.status(400).send(err)
+        else
+        {
+            comment.findOneAndUpdate(
+                {_id: req.body.comment_id},
+                {$inc: {likes_count: 1}},
+                {useFindAndModify: false},
+                (err) =>
+                {
+                    if (err) res.status(500).send(err)
+                    else res.send(createdLike)
+                },
+            )
+        }
+    })
+}
+
+const deleteCommentLike = (req, res) =>
+{
+    commentLike.deleteOne({comment_id: req.params.commentId, user_id: req.headers.authorization._id}, (err, statistic) =>
+    {
+        if (err) res.status(400).send(err)
+        else if (statistic.deletedCount === 1)
+        {
+            comment.findOneAndUpdate(
+                {_id: req.params.commentId},
+                {$inc: {likes_count: -1}},
+                {useFindAndModify: false},
+                (err) =>
+                {
+                    if (err) res.status(500).send(err)
+                    else res.send({message: "like deleted successfully"})
+                },
+            )
+        }
+        else res.status(404).send({message: "like not found!"})
+    })
+}
+
+
 const addNewComment = (req, res) =>
 {
     delete req.body.created_date
     delete req.body.is_deleted
+    delete req.body.likes_count
+    delete req.body.children_count
     req.body.user_id = req.headers.authorization._id
     const newComment = new comment(req.body)
     newComment.save((err, createdComment) =>
@@ -188,24 +231,51 @@ const getConversationComments = (req, res) =>
 {
     const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 50
     const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
-    comment.find({is_deleted: false, conversation_id: req.params.conversationId}, "description created_date user_id", {sort: "-created_date", skip, limit}, (err, comments) =>
+    comment.find({is_deleted: false, conversation_id: req.params.conversationId, parent_comment_id: {$exists: false}}, "description reply_comment_id parent_comment_id created_date likes_count user_id", {sort: "-created_date", skip, limit}, (err, comments) =>
     {
         if (err) res.status(400).send(err)
         else
         {
-            const commentsObj = comments.reduce((sum, comment) => ({...sum, [comment.id]: {...comment.toJSON()}}), {})
-            userController.getUsers({projection: "name university", condition: {_id: {$in: [...new Set(comments.reduce((sum, comment) => [...sum, comment.user_id], []))]}}})
-                .then(result =>
+            let commentsObj = comments.reduce((sum, comment) => ({...sum, [comment.id]: {...comment.toJSON()}}), {})
+
+            comment.find(
+                {is_deleted: false, parent_comment_id: [...new Set(comments.reduce((sum, comment) => [...sum, comment._id], []))]},
+                "description reply_comment_id parent_comment_id created_date likes_count user_id",
+                (err, childs) =>
                 {
-                    const usersObj = result.users.reduce((sum, user) => ({...sum, [user.id]: {...user.toJSON()}}), {})
-                    comments.forEach(item =>
+                    if (err) res.status(500).send(err)
+                    else
                     {
-                        commentsObj[item.id].user = usersObj[item.user_id]
-                        delete commentsObj[item.id].user_id
-                    })
-                    res.send(Object.values(commentsObj))
-                })
-                .catch(result => res.status(result.status || 500).send(result.err))
+                        commentsObj = {...commentsObj, ...childs.reduce((sum, comment) => ({...sum, [comment.id]: {...comment.toJSON()}}), {})}
+                        userController.getUsers({projection: "name university", condition: {_id: {$in: [...new Set(Object.values(commentsObj).reduce((sum, comment) => [...sum, comment.user_id], []))]}}})
+                            .then(result =>
+                            {
+                                const usersObj = result.users.reduce((sum, user) => ({...sum, [user.id]: {...user.toJSON()}}), {})
+                                Object.values(commentsObj).forEach(item =>
+                                {
+                                    item.user = usersObj[item.user_id]
+                                    delete item.user_id
+                                })
+
+                                if (req.headers.authorization)
+                                {
+                                    const user_id = req.headers.authorization._id
+                                    commentLike.find({user_id, comment_id: {$in: Object.values(commentsObj).reduce((sum, comment) => [...sum, comment._id], [])}}, (err, likes) =>
+                                    {
+                                        if (err) res.status(500).send(err)
+                                        else
+                                        {
+                                            likes.forEach(like => commentsObj[like.comment_id].is_liked = true)
+                                            res.send(Object.values(commentsObj))
+                                        }
+                                    })
+                                }
+                                else res.send(Object.values(commentsObj))
+                            })
+                            .catch(result => res.status(result.status || 500).send(result.err))
+                    }
+                },
+            )
         }
     })
 }
@@ -273,6 +343,8 @@ const conversationController = {
     updateCommentById,
     deleteComment,
     getConversationComments,
+    addNewCommentLike,
+    deleteCommentLike,
 }
 
 export default conversationController

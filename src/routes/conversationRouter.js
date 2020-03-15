@@ -15,6 +15,12 @@ const conversationRouter = (app) =>
     app.route("/conversation/like/:conversationId")
         .delete(conversationController.deleteLike)
 
+    app.route("/conversation/comment/like")
+        .post(conversationController.addNewCommentLike)
+
+    app.route("/conversation/comment/like/:commentId")
+        .delete(conversationController.deleteCommentLike)
+
     app.route("/conversation/comment")
         .post(conversationController.addNewComment)
         .patch(conversationController.updateCommentById)

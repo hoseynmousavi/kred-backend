@@ -16,6 +16,20 @@ const conversationCommentModel = new schema({
         minlength: 2,
         required: "Enter description!",
     },
+    parent_comment_id: {
+        type: schema.Types.ObjectId,
+    },
+    reply_comment_id: {
+        type: schema.Types.ObjectId,
+    },
+    children_count: {
+        type: Number,
+        default: 0,
+    },
+    likes_count: {
+        type: Number,
+        default: 0,
+    },
     is_deleted: {
         type: Boolean,
         default: false,
