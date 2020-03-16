@@ -7,6 +7,17 @@ const conversationModel = new schema({
         type: String,
         required: "Enter title!",
     },
+    interviewee_name: {
+        type: String,
+        required: "Enter interviewee_name!",
+    },
+    interviewee_bio: {
+        type: String,
+        required: "Enter interviewee_bio!",
+    },
+    audio: {
+        type: String,
+    },
     description: {
         type: String,
         required: "Enter description!",
