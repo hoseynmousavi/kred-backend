@@ -70,7 +70,12 @@ const addNewConversation = (req, res) =>
 {
     if (req.headers.authorization.role === "admin")
     {
+        delete req.body.created_date
+        delete req.body.likes_count
+        delete req.body.comments_count
+
         const picture = req.files ? req.files.picture : null
+        const audio = req.files ? req.files.audio : null
         if (picture)
         {
             const picName = new Date().toISOString() + picture.name
@@ -84,19 +89,45 @@ const addNewConversation = (req, res) =>
                 }
                 else
                 {
-                    delete req.body.created_date
-                    delete req.body.likes_count
-                    delete req.body.comments_count
-                    const newConversation = new conversation({...req.body, picture: `media/pictures/${picName}`})
-                    newConversation.save((err, createdConversation) =>
+                    if (audio)
                     {
-                        if (err)
+                        const audioName = new Date().toISOString() + audio.name
+                        audio.mv(`media/audios/${audioName}`, (err) =>
                         {
-                            console.log(err)
-                            res.status(400).send(err)
-                        }
-                        else res.send(createdConversation)
-                    })
+                            if (err)
+                            {
+                                console.log(err)
+                                res.status(500).send({message: "internal save audio error!"})
+                                return false
+                            }
+                            else
+                            {
+                                const newConversation = new conversation({...req.body, picture: `media/pictures/${picName}`, audio: `media/audios/${audioName}`})
+                                newConversation.save((err, createdConversation) =>
+                                {
+                                    if (err)
+                                    {
+                                        console.log(err)
+                                        res.status(400).send(err)
+                                    }
+                                    else res.send(createdConversation)
+                                })
+                            }
+                        })
+                    }
+                    else
+                    {
+                        const newConversation = new conversation({...req.body, picture: `media/pictures/${picName}`})
+                        newConversation.save((err, createdConversation) =>
+                        {
+                            if (err)
+                            {
+                                console.log(err)
+                                res.status(400).send(err)
+                            }
+                            else res.send(createdConversation)
+                        })
+                    }
                 }
             })
         }
