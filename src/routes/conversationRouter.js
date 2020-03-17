@@ -5,6 +5,7 @@ const conversationRouter = (app) =>
     app.route("/conversation")
         .get(conversationController.getConversations)
         .post(conversationController.addNewConversation)
+        .patch(conversationController.updateConversation)
 
     app.route("/conversation/:conversationId")
         .get(conversationController.getConversationById)

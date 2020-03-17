@@ -136,6 +136,113 @@ const addNewConversation = (req, res) =>
     else res.status(400).send({message: "you are not admin babe! try harder :)))"})
 }
 
+const updateConversation = (req, res) =>
+{
+    if (req.headers.authorization.role === "admin")
+    {
+        delete req.body.created_date
+        delete req.body.likes_count
+        delete req.body.comments_count
+
+        const picture = req.files ? req.files.picture : null
+        const audio = req.files ? req.files.audio : null
+        if (picture)
+        {
+            const picName = new Date().toISOString() + picture.name
+            picture.mv(`media/pictures/${picName}`, (err) =>
+            {
+                if (err)
+                {
+                    console.log(err)
+                    res.status(500).send({message: "internal save picture error!"})
+                    return false
+                }
+                else
+                {
+                    if (audio)
+                    {
+                        const audioName = new Date().toISOString() + audio.name
+                        audio.mv(`media/audios/${audioName}`, (err) =>
+                        {
+                            if (err)
+                            {
+                                console.log(err)
+                                res.status(500).send({message: "internal save audio error!"})
+                                return false
+                            }
+                            else
+                            {
+                                conversation.findOneAndUpdate(
+                                    {_id: req.body.conversation_id},
+                                    {...req.body, picture: `media/pictures/${picName}`, audio: `media/audios/${audioName}`},
+                                    {new: true, useFindAndModify: false, runValidators: true}, (err, updatedConversation) =>
+                                    {
+                                        if (err) res.status(400).send(err)
+                                        else res.send(updatedConversation)
+                                    },
+                                )
+                            }
+                        })
+                    }
+                    else
+                    {
+                        conversation.findOneAndUpdate(
+                            {_id: req.body.conversation_id},
+                            {...req.body, picture: `media/pictures/${picName}`},
+                            {new: true, useFindAndModify: false, runValidators: true}, (err, updatedConversation) =>
+                            {
+                                if (err) res.status(400).send(err)
+                                else res.send(updatedConversation)
+                            },
+                        )
+                    }
+                }
+            })
+        }
+        else
+        {
+            if (audio)
+            {
+                const audioName = new Date().toISOString() + audio.name
+                audio.mv(`media/audios/${audioName}`, (err) =>
+                {
+                    if (err)
+                    {
+                        console.log(err)
+                        res.status(500).send({message: "internal save audio error!"})
+                        return false
+                    }
+                    else
+                    {
+                        conversation.findOneAndUpdate(
+                            {_id: req.body.conversation_id},
+                            {...req.body, audio: `media/audios/${audioName}`},
+                            {new: true, useFindAndModify: false, runValidators: true}, (err, updatedConversation) =>
+                            {
+                                if (err) res.status(400).send(err)
+                                else res.send(updatedConversation)
+                            },
+                        )
+                    }
+                })
+            }
+            else
+            {
+                conversation.findOneAndUpdate(
+                    {_id: req.body.conversation_id},
+                    {...req.body},
+                    {new: true, useFindAndModify: false, runValidators: true}, (err, updatedConversation) =>
+                    {
+                        if (err) res.status(400).send(err)
+                        else res.send(updatedConversation)
+                    },
+                )
+            }
+        }
+    }
+    else res.status(400).send({message: "you are not admin babe! try harder :)))"})
+}
+
 const addNewLike = (req, res) =>
 {
     delete req.body.created_date
@@ -421,6 +528,7 @@ const conversationController = {
     getConversations,
     getConversationById,
     addNewConversation,
+    updateConversation,
     addNewLike,
     deleteLike,
     addNewComment,
