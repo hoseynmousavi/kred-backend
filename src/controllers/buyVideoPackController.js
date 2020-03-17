@@ -5,6 +5,7 @@ import buyVideoPackModel from "../models/buyVideoPackModel"
 import userVideoPackRelationController from "./userVideoPackRelationController"
 import offCodeController from "./offCodeController"
 import data from "../data"
+import notificationController from "./notificationController"
 
 const buyVideoPack = mongoose.model("buyVideoPack", buyVideoPackModel)
 
@@ -101,10 +102,7 @@ const returnAfterPayment = (req, res) =>
     if (status == 10)
     {
         axios.post("https://api.idpay.ir/v1.1/payment/verify",
-            {
-                order_id,
-                id,
-            },
+            {order_id, id},
             {headers: {"X-API-KEY": data.idPayKey}})
             .then((response) =>
             {
@@ -120,6 +118,25 @@ const returnAfterPayment = (req, res) =>
                                 {
                                     res.redirect("https://www.kred.ir/payment/success")
                                     if (updatedOrder.off_code_id) offCodeController.useOffCode({user_id: updatedOrder.user_id, off_code_id: updatedOrder.off_code_id})
+
+                                    for (let i = 0; i < data.adminIds.length; i++)
+                                    {
+                                        setTimeout(() =>
+                                            {
+                                                notificationController.sendNotification({
+                                                    user_id: data.adminIds[i],
+                                                    title: `ادمین! فروش داشتیم 🥳!`,
+                                                    icon: data.domain_url + "/logo192.png",
+                                                    url: data.domain_url + "/panel/sales",
+                                                    body: updatedOrder.price.toString() + " تومان",
+                                                    tag: updatedOrder._id.toString(),
+                                                    requireInteraction: true,
+                                                    renotify: true,
+                                                })
+                                            }
+                                            , i * 1000)
+                                    }
+
                                 })
                                 .catch(() => res.redirect("https://www.kred.ir/payment/fail"))
                         }
@@ -168,7 +185,7 @@ const addBuyVideoForAdmin = (req, res) =>
                     userVideoPackRelationController.addUserVideoPackPermission({video_pack_id, user_id, buy_video_pack_id: createdOrder._id})
                         .then(() => res.send({message: "done admin"}))
                         .catch((result) => res.status(result.status).send(result.err))
-                } 
+                }
             })
         }
         else res.status(400).send({message: "please send user_id, video_pack_id, price"})

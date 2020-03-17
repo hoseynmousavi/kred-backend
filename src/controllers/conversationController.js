@@ -222,9 +222,9 @@ const addNewComment = (req, res) =>
                     {
                         res.send(createdComment)
 
-                        if (createdComment.toJSON().reply_comment_id)
+                        if (createdComment.reply_comment_id)
                         {
-                            comment.findById(createdComment.toJSON().reply_comment_id, (err, takenComment) =>
+                            comment.findById(createdComment.reply_comment_id, (err, takenComment) =>
                             {
                                 if (err) console.log("shit")
                                 else
@@ -234,8 +234,8 @@ const addNewComment = (req, res) =>
                                         {
                                             if (result.users && result.users.length === 1)
                                             {
-                                                const user = result.users[0].toJSON()
-                                                if (user._id !== createdComment.toJSON().user_id)
+                                                const user = result.users[0]
+                                                if (user._id.toString() !== createdComment.user_id.toString())
                                                 {
                                                     notificationController.sendNotification({
                                                         user_id: user._id,
@@ -243,7 +243,7 @@ const addNewComment = (req, res) =>
                                                         image: data.restful_url + req.headers.authorization.avatar,
                                                         icon: data.domain_url + "/logo192.png",
                                                         url: data.domain_url + "/pavilions/" + req.body.conversation_id + "/comments",
-                                                        body: createdComment.toJSON().description,
+                                                        body: createdComment.description,
                                                         tag: createdComment._id.toString() + "reply",
                                                         requireInteraction: true,
                                                         renotify: true,
@@ -255,20 +255,17 @@ const addNewComment = (req, res) =>
                             })
                         }
 
-                        const adminIds = [
-                            "5da0cc1e8088bb5a41e40eff", "5da0e75a7d95bc0b30c492ca", "5da0e8d67d95bc0b30c492cb",
-                            "5da2eec47d95bc0b30c492cf", "5dc2ac8955a4e622fe895a92", "5e430d93dec1c036332cf926",
-                        ]
-                        for (let i = 0; i < adminIds.length; i++)
+
+                        for (let i = 0; i < data.adminIds.length; i++)
                         {
                             setTimeout(() =>
                                 {
                                     notificationController.sendNotification({
-                                        user_id: adminIds[i],
+                                        user_id: data.adminIds[i],
                                         title: `ادمین! ${req.headers.authorization.name || req.headers.authorization.phone} برامون کامنت گذاشته!`,
                                         icon: data.domain_url + "/logo192.png",
                                         url: data.domain_url + "/pavilions/" + req.body.conversation_id + "/comments",
-                                        body: createdComment.toJSON().description,
+                                        body: createdComment.description,
                                         tag: createdComment._id.toString() + "admin",
                                         requireInteraction: true,
                                         renotify: true,
