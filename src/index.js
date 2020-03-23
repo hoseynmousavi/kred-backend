@@ -24,6 +24,7 @@ import offCodeRouter from "./routes/offCodeRouter"
 import mailRouter from "./routes/mailRouter"
 import fileRouter from "./routes/fileRouter"
 import notificationRouter from "./routes/notificationRouter"
+import classRouter from "./routes/classRouter"
 
 // Normal Things Never Leave Us Alone ...
 const app = express()
@@ -57,6 +58,7 @@ verificationCodeRouter(app)
 offCodeRouter(app)
 mailRouter(app)
 notificationRouter(app)
+classRouter(app)
 fileRouter(app, __dirname)
 notFoundRooter(app) // & at the end
 
