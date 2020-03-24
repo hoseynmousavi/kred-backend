@@ -6,9 +6,17 @@ const classRouter = (app) =>
         .get(classController.getLessons)
         .post(classController.addLesson)
 
+    app.route("/lesson/category")
+        .get(classController.getLessonCategories)
+        .post(classController.addLessonCategory)
+
     app.route("/block")
         .get(classController.getBlocks)
         .post(classController.addBlock)
+
+    app.route("/block/category")
+        .get(classController.getBlockCategories)
+        .post(classController.addBlockCategory)
 }
 
 export default classRouter

@@ -1,15 +1,19 @@
 import mongoose from "mongoose"
 import lessonModel from "../models/lessonModel"
 import blockModel from "../models/blockModel"
+import lessonCategoryModel from "../models/lessonCategoryModel"
+import blockCategoryModel from "../models/blockCategoryModel"
 
 const lesson = mongoose.model("lesson", lessonModel)
+const lessonCategory = mongoose.model("lessonCategory", lessonCategoryModel)
 const block = mongoose.model("block", blockModel)
+const blockCategory = mongoose.model("blockCategory", blockCategoryModel)
 
 const getLessons = (req, res) =>
 {
-    lesson.find(null, "title svg", null, (err, lessons) =>
+    lesson.find({is_deleted: false}, "title svg", null, (err, lessons) =>
     {
-        if (err) res.status(400).send(err)
+        if (err) res.status(500).send(err)
         else res.send(lessons)
     })
 }
@@ -46,11 +50,57 @@ const addLesson = (req, res) =>
     else res.status(403).send({message: "you don't have permission babe!"})
 }
 
+const getLessonCategories = (req, res) =>
+{
+    if (req.query.lesson_id)
+    {
+        lessonCategory.find({is_deleted: false, lesson_id: req.query.lesson_id}, "title svg", null, (err, lessons) =>
+        {
+            if (err) res.status(500).send(err)
+            else res.send(lessons)
+        })
+    }
+    else res.status(400).send({message: "send lesson_id as query param"})
+}
+
+const addLessonCategory = (req, res) =>
+{
+    if (req.headers.authorization.role === "admin")
+    {
+        delete req.body.is_deleted
+        delete req.body.created_date
+
+        const svg = req.files ? req.files.svg : null
+        const title = req.body.title
+        const lesson_id = req.body.lesson_id
+
+        if (svg && title && lesson_id)
+        {
+            const svgName = new Date().toISOString() + svg.name
+            svg.mv(`media/svgs/${svgName}`, (err) =>
+            {
+                if (err) res.status(500).send(err)
+                else
+                {
+                    const newLessonCategory = new lessonCategory({title, lesson_id, svg: `/media/svgs/${svgName}`})
+                    newLessonCategory.save((err, createdLessonCategory) =>
+                    {
+                        if (err) res.status(400).send(err)
+                        else res.send(createdLessonCategory)
+                    })
+                }
+            })
+        }
+        else res.status(400).send({message: "send svg && title && lesson_id!"})
+    }
+    else res.status(403).send({message: "you don't have permission babe!"})
+}
+
 const getBlocks = (req, res) =>
 {
-    block.find(null, "title svg", null, (err, blocks) =>
+    block.find({is_deleted: false}, "title svg", null, (err, blocks) =>
     {
-        if (err) res.status(400).send(err)
+        if (err) res.status(500).send(err)
         else res.send(blocks)
     })
 }
@@ -87,11 +137,61 @@ const addBlock = (req, res) =>
     else res.status(403).send({message: "you don't have permission babe!"})
 }
 
+const getBlockCategories = (req, res) =>
+{
+    if (req.query.block_id)
+    {
+        blockCategory.find({is_deleted: false, block_id: req.query.block_id}, "title svg", null, (err, lessons) =>
+        {
+            if (err) res.status(500).send(err)
+            else res.send(lessons)
+        })
+    }
+    else res.status(400).send({message: "send block_id as query param"})
+}
+
+const addBlockCategory = (req, res) =>
+{
+    if (req.headers.authorization.role === "admin")
+    {
+        delete req.body.is_deleted
+        delete req.body.created_date
+
+        const svg = req.files ? req.files.svg : null
+        const title = req.body.title
+        const block_id = req.body.block_id
+
+        if (svg && title && block_id)
+        {
+            const svgName = new Date().toISOString() + svg.name
+            svg.mv(`media/svgs/${svgName}`, (err) =>
+            {
+                if (err) res.status(500).send(err)
+                else
+                {
+                    const newBlockCategory = new blockCategory({title, block_id, svg: `/media/svgs/${svgName}`})
+                    newBlockCategory.save((err, createdBlockCategory) =>
+                    {
+                        if (err) res.status(400).send(err)
+                        else res.send(createdBlockCategory)
+                    })
+                }
+            })
+        }
+        else res.status(400).send({message: "send svg && title && block_id!"})
+    }
+    else res.status(403).send({message: "you don't have permission babe!"})
+}
+
 const classController = {
     getLessons,
     addLesson,
+    getLessonCategories,
+    addLessonCategory,
     getBlocks,
     addBlock,
+    getBlockCategories,
+    addBlockCategory,
 }
 
 export default classController
