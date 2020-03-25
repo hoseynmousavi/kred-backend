@@ -50,6 +50,16 @@ const addLesson = (req, res) =>
     else res.status(403).send({message: "you don't have permission babe!"})
 }
 
+const getLessonById = (req, res) =>
+{
+    lesson.findOne({is_deleted: false, _id: req.params.lesson_id}, "title svg", null, (err, takenLesson) =>
+    {
+        if (err) res.status(500).send(err)
+        else if (!takenLesson) res.status(404).send({message: "not found!"})
+        else res.send(takenLesson)
+    })
+}
+
 const getLessonCategories = (req, res) =>
 {
     if (req.query.lesson_id)
@@ -137,6 +147,16 @@ const addBlock = (req, res) =>
     else res.status(403).send({message: "you don't have permission babe!"})
 }
 
+const getBlockById = (req, res) =>
+{
+    block.findOne({is_deleted: false, _id: req.params.block_id}, "title svg", null, (err, takenBlock) =>
+    {
+        if (err) res.status(500).send(err)
+        else if (!takenBlock) res.status(404).send({message: "not found!"})
+        else res.send(takenBlock)
+    })
+}
+
 const getBlockCategories = (req, res) =>
 {
     if (req.query.block_id)
@@ -186,9 +206,11 @@ const addBlockCategory = (req, res) =>
 const classController = {
     getLessons,
     addLesson,
+    getLessonById,
     getLessonCategories,
     addLessonCategory,
     getBlocks,
+    getBlockById,
     addBlock,
     getBlockCategories,
     addBlockCategory,

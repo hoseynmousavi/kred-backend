@@ -10,6 +10,9 @@ const classRouter = (app) =>
         .get(classController.getLessonCategories)
         .post(classController.addLessonCategory)
 
+    app.route("/lesson/:lesson_id")
+        .get(classController.getLessonById)
+
     app.route("/block")
         .get(classController.getBlocks)
         .post(classController.addBlock)
@@ -17,6 +20,9 @@ const classRouter = (app) =>
     app.route("/block/category")
         .get(classController.getBlockCategories)
         .post(classController.addBlockCategory)
+
+    app.route("/block/:block_id")
+        .get(classController.getBlockById)
 }
 
 export default classRouter
