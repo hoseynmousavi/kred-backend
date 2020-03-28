@@ -24,7 +24,6 @@ const conversationRouter = (app) =>
 
     app.route("/conversation/comment")
         .post(conversationController.addNewComment)
-        .patch(conversationController.updateCommentById)
 
     app.route("/conversation/comments/:conversationId")
         .get(conversationController.getConversationComments)

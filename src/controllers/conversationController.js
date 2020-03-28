@@ -335,7 +335,6 @@ const deleteCommentLike = (req, res) =>
     })
 }
 
-
 const addNewComment = (req, res) =>
 {
     delete req.body.created_date
@@ -471,25 +470,6 @@ const getConversationComments = (req, res) =>
     })
 }
 
-
-const updateCommentById = (req, res) =>
-{
-    comment.findOneAndUpdate(
-        {_id: req.body.comment_id, user_id: req.headers.authorization._id, is_deleted: false},
-        {description: req.body.description},
-        {new: true, useFindAndModify: false, runValidators: true},
-        (err, updatedComment) =>
-        {
-            if (err)
-            {
-                console.log(err)
-                res.status(400).send(err)
-            }
-            else res.send(updatedComment)
-        },
-    )
-}
-
 const deleteComment = (req, res) =>
 {
     comment.findOne({_id: req.params.commentId, user_id: req.headers.authorization._id, is_deleted: false}, (err, takenComment) =>
@@ -532,7 +512,6 @@ const conversationController = {
     addNewLike,
     deleteLike,
     addNewComment,
-    updateCommentById,
     deleteComment,
     getConversationComments,
     addNewCommentLike,

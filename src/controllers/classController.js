@@ -4,13 +4,21 @@ import blockModel from "../models/blockModel"
 import lessonCategoryModel from "../models/lessonCategoryModel"
 import blockCategoryModel from "../models/blockCategoryModel"
 import educationResourceModel from "../models/educationResourceModel"
+import educationCommentModel from "../models/educationCommentModel"
+import educationLikeModel from "../models/educationLikeModel"
+import educationCommentLikeModel from "../models/educationCommentLikeModel"
+import userController from "./userController"
+import notificationController from "./notificationController"
+import data from "../data"
 
 const lesson = mongoose.model("lesson", lessonModel)
 const lessonCategory = mongoose.model("lessonCategory", lessonCategoryModel)
 const block = mongoose.model("block", blockModel)
 const blockCategory = mongoose.model("blockCategory", blockCategoryModel)
-
 const educationResource = mongoose.model("educationResource", educationResourceModel)
+const comment = mongoose.model("educationComment", educationCommentModel)
+const like = mongoose.model("educationLike", educationLikeModel)
+const commentLike = mongoose.model("educationCommentLike", educationCommentLikeModel)
 
 const getLessons = (req, res) =>
 {
@@ -286,6 +294,267 @@ const getEducationResourceById = (req, res) =>
     })
 }
 
+const addNewLike = (req, res) =>
+{
+    delete req.body.created_date
+    req.body.user_id = req.headers.authorization._id
+    const newLike = new like(req.body)
+    newLike.save((err, createdLike) =>
+    {
+        if (err) res.status(400).send(err)
+        else
+        {
+            educationResource.findOneAndUpdate(
+                {_id: req.body.education_id},
+                {$inc: {likes_count: 1}},
+                {useFindAndModify: false},
+                (err) =>
+                {
+                    if (err) res.status(500).send(err)
+                    else res.send(createdLike)
+                },
+            )
+        }
+    })
+}
+
+const deleteLike = (req, res) =>
+{
+    like.deleteOne({education_id: req.params.education_id, user_id: req.headers.authorization._id}, (err, statistic) =>
+    {
+        if (err) res.status(400).send(err)
+        else if (statistic.deletedCount === 1)
+        {
+            educationResource.findOneAndUpdate(
+                {_id: req.params.educationId},
+                {$inc: {likes_count: -1}},
+                {useFindAndModify: false},
+                (err) =>
+                {
+                    if (err) res.status(500).send(err)
+                    else res.send({message: "like deleted successfully"})
+                },
+            )
+        }
+        else res.status(404).send({message: "like not found!"})
+    })
+}
+
+const addNewCommentLike = (req, res) =>
+{
+    delete req.body.created_date
+    req.body.user_id = req.headers.authorization._id
+    const newLike = new commentLike(req.body)
+    newLike.save((err, createdLike) =>
+    {
+        if (err) res.status(400).send(err)
+        else
+        {
+            comment.findOneAndUpdate(
+                {_id: req.body.comment_id},
+                {$inc: {likes_count: 1}},
+                {useFindAndModify: false},
+                (err) =>
+                {
+                    if (err) res.status(500).send(err)
+                    else res.send(createdLike)
+                },
+            )
+        }
+    })
+}
+
+const deleteCommentLike = (req, res) =>
+{
+    commentLike.deleteOne({comment_id: req.params.commentId, user_id: req.headers.authorization._id}, (err, statistic) =>
+    {
+        if (err) res.status(400).send(err)
+        else if (statistic.deletedCount === 1)
+        {
+            comment.findOneAndUpdate(
+                {_id: req.params.commentId},
+                {$inc: {likes_count: -1}},
+                {useFindAndModify: false},
+                (err) =>
+                {
+                    if (err) res.status(500).send(err)
+                    else res.send({message: "like deleted successfully"})
+                },
+            )
+        }
+        else res.status(404).send({message: "like not found!"})
+    })
+}
+
+const addNewComment = (req, res) =>
+{
+    delete req.body.created_date
+    delete req.body.is_deleted
+    delete req.body.likes_count
+    delete req.body.children_count
+    req.body.user_id = req.headers.authorization._id
+    const newComment = new comment(req.body)
+    newComment.save((err, createdComment) =>
+    {
+        if (err) res.status(400).send(err)
+        else
+        {
+            educationResource.findOneAndUpdate(
+                {_id: req.body.education_id},
+                {$inc: {comments_count: 1}},
+                {useFindAndModify: false},
+                (err) =>
+                {
+                    if (err) res.status(500).send(err)
+                    else
+                    {
+                        res.send(createdComment)
+
+                        if (createdComment.reply_comment_id)
+                        {
+                            comment.findById(createdComment.reply_comment_id, (err, takenComment) =>
+                            {
+                                if (err) console.log(err)
+                                else
+                                {
+                                    userController.getUsers({condition: {_id: takenComment.user_id}})
+                                        .then(result =>
+                                        {
+                                            if (result.users && result.users.length === 1)
+                                            {
+                                                const user = result.users[0]
+                                                if (user._id.toString() !== createdComment.user_id.toString())
+                                                {
+                                                    notificationController.sendNotification({
+                                                        user_id: user._id,
+                                                        title: `${req.headers.authorization.name} پاسخ کامنت شما را داده است!`,
+                                                        image: data.restful_url + req.headers.authorization.avatar,
+                                                        icon: data.domain_url + "/logo192.png",
+                                                        url: data.domain_url, // TODO Hoseyn fix it
+                                                        body: createdComment.description,
+                                                        tag: createdComment._id.toString() + "reply",
+                                                        requireInteraction: true,
+                                                        renotify: true,
+                                                    })
+                                                }
+                                            }
+                                        })
+                                }
+                            })
+                        }
+
+
+                        for (let i = 0; i < data.adminIds.length; i++)
+                        {
+                            setTimeout(() =>
+                                {
+                                    notificationController.sendNotification({
+                                        user_id: data.adminIds[i],
+                                        title: `ادمین! ${req.headers.authorization.name || req.headers.authorization.phone} برامون کامنت گذاشته!`,
+                                        icon: data.domain_url + "/logo192.png",
+                                        url: data.domain_url, // TODO Hoseyn fix it
+                                        body: createdComment.description,
+                                        tag: createdComment._id.toString() + "admin",
+                                        requireInteraction: true,
+                                        renotify: true,
+                                    })
+                                }
+                                , i * 1000)
+                        }
+                    }
+                },
+            )
+        }
+    })
+}
+
+const getEducationComments = (req, res) =>
+{
+    const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 50
+    const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
+    comment.find({is_deleted: false, education_id: req.params.educationId, parent_comment_id: {$exists: false}}, "description reply_comment_id parent_comment_id created_date likes_count user_id", {sort: "-created_date", skip, limit}, (err, comments) =>
+    {
+        if (err) res.status(400).send(err)
+        else
+        {
+            let commentsObj = comments.reduce((sum, comment) => ({...sum, [comment.id]: {...comment.toJSON()}}), {})
+
+            comment.find(
+                {is_deleted: false, parent_comment_id: [...new Set(comments.reduce((sum, comment) => [...sum, comment._id], []))]},
+                "description reply_comment_id parent_comment_id created_date likes_count user_id",
+                (err, childs) =>
+                {
+                    if (err) res.status(500).send(err)
+                    else
+                    {
+                        commentsObj = {...commentsObj, ...childs.reduce((sum, comment) => ({...sum, [comment.id]: {...comment.toJSON()}}), {})}
+                        userController.getUsers({projection: "avatar name university", condition: {_id: {$in: [...new Set(Object.values(commentsObj).reduce((sum, comment) => [...sum, comment.user_id], []))]}}})
+                            .then(result =>
+                            {
+                                const usersObj = result.users.reduce((sum, user) => ({...sum, [user.id]: {...user.toJSON()}}), {})
+                                Object.values(commentsObj).forEach(item =>
+                                {
+                                    item.user = usersObj[item.user_id]
+                                    delete item.user_id
+                                })
+
+                                if (req.headers.authorization)
+                                {
+                                    const user_id = req.headers.authorization._id
+                                    commentLike.find({user_id, comment_id: {$in: Object.values(commentsObj).reduce((sum, comment) => [...sum, comment._id], [])}}, (err, likes) =>
+                                    {
+                                        if (err) res.status(500).send(err)
+                                        else
+                                        {
+                                            likes.forEach(like => commentsObj[like.comment_id].is_liked = true)
+                                            res.send(Object.values(commentsObj))
+                                        }
+                                    })
+                                }
+                                else res.send(Object.values(commentsObj))
+                            })
+                            .catch(result => res.status(result.status || 500).send(result.err))
+                    }
+                },
+            )
+        }
+    })
+}
+
+const deleteComment = (req, res) =>
+{
+    comment.findOne({_id: req.params.commentId, user_id: req.headers.authorization._id, is_deleted: false}, (err, takenComment) =>
+    {
+        if (err) res.status(400).send(err)
+        else if (!takenComment) res.status(404).send({message: "comment not found!"})
+        else
+        {
+            comment.findOneAndUpdate(
+                {_id: req.params.commentId, user_id: req.headers.authorization._id},
+                {is_deleted: true},
+                {useFindAndModify: false},
+                (err) =>
+                {
+                    if (err) res.status(400).send(err)
+                    else
+                    {
+                        educationResource.findOneAndUpdate(
+                            {_id: takenComment.education_id},
+                            {$inc: {comments_count: -1}},
+                            {useFindAndModify: false},
+                            (err) =>
+                            {
+                                if (err) res.status(400).send(err)
+                                else res.send({message: "comment deleted successfully"})
+                            },
+                        )
+                    }
+                },
+            )
+        }
+    })
+}
+
 const classController = {
     getLessons,
     addLesson,
@@ -300,6 +569,13 @@ const classController = {
     addEducationResource,
     getEducationResource,
     getEducationResourceById,
+    addNewLike,
+    deleteLike,
+    addNewCommentLike,
+    deleteCommentLike,
+    addNewComment,
+    getEducationComments,
+    deleteComment,
 }
 
 export default classController
