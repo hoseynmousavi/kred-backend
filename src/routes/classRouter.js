@@ -23,6 +23,13 @@ const classRouter = (app) =>
 
     app.route("/block/:block_id")
         .get(classController.getBlockById)
+
+    app.route("/education-resource")
+        .get(classController.getEducationResource)
+        .post(classController.addEducationResource)
+
+    app.route("/education-resource/:education_id")
+        .get(classController.getEducationResourceById)
 }
 
 export default classRouter

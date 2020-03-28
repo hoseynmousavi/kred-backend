@@ -3,11 +3,14 @@ import lessonModel from "../models/lessonModel"
 import blockModel from "../models/blockModel"
 import lessonCategoryModel from "../models/lessonCategoryModel"
 import blockCategoryModel from "../models/blockCategoryModel"
+import educationResourceModel from "../models/educationResourceModel"
 
 const lesson = mongoose.model("lesson", lessonModel)
 const lessonCategory = mongoose.model("lessonCategory", lessonCategoryModel)
 const block = mongoose.model("block", blockModel)
 const blockCategory = mongoose.model("blockCategory", blockCategoryModel)
+
+const educationResource = mongoose.model("educationResource", educationResourceModel)
 
 const getLessons = (req, res) =>
 {
@@ -203,6 +206,82 @@ const addBlockCategory = (req, res) =>
     else res.status(403).send({message: "you don't have permission babe!"})
 }
 
+const addEducationResource = (req, res) =>
+{
+    if (req.headers.authorization.role === "admin")
+    {
+        const {lesson_category_id, block_category_id, lesson_id, block_id} = req.body
+        if (lesson_category_id || block_category_id || lesson_id || block_id)
+        {
+            const file = req.files ? req.files.file : null
+            const picture = req.files ? req.files.picture : null
+            if (file)
+            {
+                const fileName = new Date().toISOString() + file.name
+                file.mv(`media/files/${fileName}`, (err) =>
+                {
+                    if (err) res.status(500).send(err)
+                    else
+                    {
+                        if (picture)
+                        {
+                            const pictureName = new Date().toISOString() + picture.name
+                            picture.mv(`media/pictures/${pictureName}`, (err) =>
+                            {
+                                if (err) console.log(err)
+                                const newEducation = new educationResource({...req.body, file: `/media/files/${fileName}`, picture: `/media/pictures/${pictureName}`})
+                                newEducation.save((err, createdEducation) =>
+                                {
+                                    if (err) res.status(400).send(err)
+                                    else res.send(createdEducation)
+                                })
+                            })
+                        }
+                        else
+                        {
+                            const newEducation = new educationResource({...req.body, file: `/media/files/${fileName}`})
+                            newEducation.save((err, createdEducation) =>
+                            {
+                                if (err) res.status(400).send(err)
+                                else res.send(createdEducation)
+                            })
+                        }
+                    }
+                })
+            }
+            else res.status(400).send({message: "send file!"})
+        }
+        else res.status(400).send({message: "please send lesson_category_id || block_category_id || lesson_id || block_id"})
+    }
+    else res.status(403).send({message: "you don't have permission babe!"})
+}
+
+const getEducationResource = (req, res) =>
+{
+    const {lesson_category_id, block_category_id, lesson_id, block_id, type} = req.query
+    if (lesson_category_id || block_category_id || lesson_id || block_id)
+    {
+        const fields = "title likes_count university teacher subject type file"
+        const options = {sort: "-created_date"}
+        educationResource.find({is_deleted: false, type, lesson_category_id, block_category_id, lesson_id, block_id}, fields, options, (err, takenEducations) =>
+        {
+            if (err) res.status(400).send(err)
+            else res.send(takenEducations)
+        })
+    }
+    else res.status(400).send({message: "please send lesson_category_id || block_category_id || lesson_id || block_id as query param"})
+}
+
+const getEducationResourceById = (req, res) =>
+{
+    educationResource.findOne({is_deleted: false, _id: req.params.education_id}, "title likes_count comments_count university teacher subject writer type picture file created_date", null, (err, takenEducation) =>
+    {
+        if (err) res.status(500).send(err)
+        else if (!takenEducation) res.status(404).send({message: "not found!"})
+        else res.send(takenEducation)
+    })
+}
+
 const classController = {
     getLessons,
     addLesson,
@@ -214,6 +293,9 @@ const classController = {
     addBlock,
     getBlockCategories,
     addBlockCategory,
+    addEducationResource,
+    getEducationResource,
+    getEducationResourceById,
 }
 
 export default classController

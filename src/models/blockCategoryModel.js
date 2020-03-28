@@ -12,6 +12,7 @@ const blockCategoryModel = new schema({
     block_id: {
         type: schema.Types.ObjectId,
         ref: "block",
+        required: "Enter block_id!",
     },
     svg: {
         type: String,

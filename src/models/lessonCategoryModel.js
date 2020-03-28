@@ -12,6 +12,7 @@ const lessonCategoryModel = new schema({
     lesson_id: {
         type: schema.Types.ObjectId,
         ref: "lesson",
+        required: "Enter lesson_id!",
     },
     svg: {
         type: String,
