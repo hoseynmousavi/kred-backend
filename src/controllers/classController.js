@@ -67,7 +67,9 @@ const getLessonCategories = (req, res) =>
 {
     if (req.query.lesson_id)
     {
-        lessonCategory.find({is_deleted: false, lesson_id: req.query.lesson_id}, "title svg", null, (err, lessons) =>
+        let query = {is_deleted: false, lesson_id: req.query.lesson_id}
+        if (req.query.title) query.title = new RegExp(req.query.title)
+        lessonCategory.find(query, "title svg", null, (err, lessons) =>
         {
             if (err) res.status(500).send(err)
             else res.send(lessons)
@@ -164,7 +166,9 @@ const getBlockCategories = (req, res) =>
 {
     if (req.query.block_id)
     {
-        blockCategory.find({is_deleted: false, block_id: req.query.block_id}, "title svg", null, (err, lessons) =>
+        let query = {is_deleted: false, block_id: req.query.block_id}
+        if (req.query.title) query.title = new RegExp(req.query.title)
+        blockCategory.find(query, "title svg", null, (err, lessons) =>
         {
             if (err) res.status(500).send(err)
             else res.send(lessons)
