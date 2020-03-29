@@ -7,28 +7,28 @@ const conversationRouter = (app) =>
         .post(conversationController.addNewConversation)
         .patch(conversationController.updateConversation)
 
-    app.route("/conversation/:conversationId")
+    app.route("/conversation/:conversation_id")
         .get(conversationController.getConversationById)
 
     app.route("/conversation/like")
         .post(conversationController.addNewLike)
 
-    app.route("/conversation/like/:conversationId")
+    app.route("/conversation/like/:conversation_id")
         .delete(conversationController.deleteLike)
 
     app.route("/conversation/comment/like")
         .post(conversationController.addNewCommentLike)
 
-    app.route("/conversation/comment/like/:commentId")
+    app.route("/conversation/comment/like/:comment_id")
         .delete(conversationController.deleteCommentLike)
 
     app.route("/conversation/comment")
         .post(conversationController.addNewComment)
 
-    app.route("/conversation/comments/:conversationId")
+    app.route("/conversation/comments/:conversation_id")
         .get(conversationController.getConversationComments)
 
-    app.route("/conversation/comment/:commentId")
+    app.route("/conversation/comment/:comment_id")
         .delete(conversationController.deleteComment)
 }
 

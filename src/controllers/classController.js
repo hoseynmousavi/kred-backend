@@ -293,9 +293,15 @@ const getEducationResource = (req, res) =>
     const {lesson_category_id, block_category_id, lesson_id, block_id, type} = req.query
     if (lesson_category_id || block_category_id || lesson_id || block_id)
     {
+        let query = {is_deleted: false}
         const fields = "title likes_count university teacher subject type file"
         const options = {sort: "-created_date"}
-        educationResource.find({is_deleted: false, type, lesson_category_id, block_category_id, lesson_id, block_id}, fields, options, (err, takenEducations) =>
+        if (type) query.type = type
+        if (lesson_category_id) query.lesson_category_id = lesson_category_id
+        if (block_category_id) query.block_category_id = block_category_id
+        if (lesson_id) query.lesson_id = lesson_id
+        if (block_id) query.block_id = block_id
+        educationResource.find(query, fields, options, (err, takenEducations) =>
         {
             if (err) res.status(400).send(err)
             else res.send(takenEducations)

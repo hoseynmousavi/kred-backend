@@ -42,7 +42,7 @@ const getConversations = (req, res) =>
 
 const getConversationById = (req, res) =>
 {
-    conversation.findById(req.params.conversationId, (err, takenConversation) =>
+    conversation.findById(req.params.conversation_id, (err, takenConversation) =>
     {
         if (err) res.status(500).send(err)
         else if (!takenConversation) res.status(404).send({message: "not found!"})
@@ -51,7 +51,7 @@ const getConversationById = (req, res) =>
             if (req.headers.authorization)
             {
                 const user_id = req.headers.authorization._id
-                like.findOne({user_id, conversation_id: req.params.conversationId}, (err, takenLike) =>
+                like.findOne({user_id, conversation_id: req.params.conversation_id}, (err, takenLike) =>
                 {
                     if (err) res.status(500).send(err)
                     else
@@ -269,13 +269,13 @@ const addNewLike = (req, res) =>
 
 const deleteLike = (req, res) =>
 {
-    like.deleteOne({conversation_id: req.params.conversationId, user_id: req.headers.authorization._id}, (err, statistic) =>
+    like.deleteOne({conversation_id: req.params.conversation_id, user_id: req.headers.authorization._id}, (err, statistic) =>
     {
         if (err) res.status(400).send(err)
         else if (statistic.deletedCount === 1)
         {
             conversation.findOneAndUpdate(
-                {_id: req.params.conversationId},
+                {_id: req.params.conversation_id},
                 {$inc: {likes_count: -1}},
                 {useFindAndModify: false},
                 (err) =>
@@ -315,13 +315,13 @@ const addNewCommentLike = (req, res) =>
 
 const deleteCommentLike = (req, res) =>
 {
-    commentLike.deleteOne({comment_id: req.params.commentId, user_id: req.headers.authorization._id}, (err, statistic) =>
+    commentLike.deleteOne({comment_id: req.params.comment_id, user_id: req.headers.authorization._id}, (err, statistic) =>
     {
         if (err) res.status(400).send(err)
         else if (statistic.deletedCount === 1)
         {
             comment.findOneAndUpdate(
-                {_id: req.params.commentId},
+                {_id: req.params.comment_id},
                 {$inc: {likes_count: -1}},
                 {useFindAndModify: false},
                 (err) =>
@@ -421,7 +421,7 @@ const getConversationComments = (req, res) =>
 {
     const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 50
     const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
-    comment.find({is_deleted: false, conversation_id: req.params.conversationId, parent_comment_id: {$exists: false}}, "description reply_comment_id parent_comment_id created_date likes_count user_id", {sort: "-created_date", skip, limit}, (err, comments) =>
+    comment.find({is_deleted: false, conversation_id: req.params.conversation_id, parent_comment_id: {$exists: false}}, "description reply_comment_id parent_comment_id created_date likes_count user_id", {sort: "-created_date", skip, limit}, (err, comments) =>
     {
         if (err) res.status(400).send(err)
         else
@@ -472,14 +472,14 @@ const getConversationComments = (req, res) =>
 
 const deleteComment = (req, res) =>
 {
-    comment.findOne({_id: req.params.commentId, user_id: req.headers.authorization._id, is_deleted: false}, (err, takenComment) =>
+    comment.findOne({_id: req.params.comment_id, user_id: req.headers.authorization._id, is_deleted: false}, (err, takenComment) =>
     {
         if (err) res.status(400).send(err)
         else if (!takenComment) res.status(404).send({message: "comment not found!"})
         else
         {
             comment.findOneAndUpdate(
-                {_id: req.params.commentId, user_id: req.headers.authorization._id},
+                {_id: req.params.comment_id, user_id: req.headers.authorization._id},
                 {is_deleted: true},
                 {useFindAndModify: false},
                 (err) =>

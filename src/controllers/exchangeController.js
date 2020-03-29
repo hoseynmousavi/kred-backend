@@ -47,7 +47,7 @@ const getExchanges = (req, res) =>
 
 const getExchangeById = (req, res) =>
 {
-    exchange.findById(req.params.exchangeId, (err, takenExchange) =>
+    exchange.findById(req.params.exchange_id, (err, takenExchange) =>
     {
         if (err) res.status(500).send(err)
         else if (!takenExchange || takenExchange.is_deleted || !takenExchange.is_verified) res.status(404).send({message: "not found!"})
@@ -136,15 +136,15 @@ const addNewExchange = (req, res) =>
 
 const deleteExchangeById = (req, res) =>
 {
-    if (req.params.exchangeId)
+    if (req.params.exchange_id)
     {
-        exchange.findOneAndUpdate({user_id: req.headers.authorization._id, _id: req.params.exchangeId}, {is_deleted: true}, {new: true, useFindAndModify: false, runValidators: true}, (err, _) =>
+        exchange.findOneAndUpdate({user_id: req.headers.authorization._id, _id: req.params.exchange_id}, {is_deleted: true}, {new: true, useFindAndModify: false, runValidators: true}, (err, _) =>
         {
             if (err) res.status(500).send(err)
             else res.send({message: "exchange deleted successfully"})
         })
     }
-    else res.status(400).send({message: "send exchangeId as param"})
+    else res.status(400).send({message: "send exchange_id as param"})
 }
 
 const exchangeController = {

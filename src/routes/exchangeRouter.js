@@ -6,7 +6,7 @@ const exchangeRouter = (app) =>
         .get(exchangeController.getExchanges)
         .post(exchangeController.addNewExchange)
 
-    app.route("/exchange/:exchangeId")
+    app.route("/exchange/:exchange_id")
         .get(exchangeController.getExchangeById)
         .delete(exchangeController.deleteExchangeById)
 }

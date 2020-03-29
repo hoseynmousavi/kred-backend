@@ -16,7 +16,7 @@ const getCategories = (req, res) =>
 
 const getCategoryById = (req, res) =>
 {
-    category.findById(req.params.categoryId, (err, takenCategory) =>
+    category.findById(req.params.category_id, (err, takenCategory) =>
     {
         if (err) res.status(500).send(err)
         else if (!takenCategory) res.status(404).send({message: "not found!"})

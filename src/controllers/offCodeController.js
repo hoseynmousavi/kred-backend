@@ -118,9 +118,9 @@ const deleteOffCode = (req, res) =>
 {
     if (req.headers.authorization.role === "admin")
     {
-        if (req.params.offCodeId)
+        if (req.params.off_code_id)
         {
-            offCode.findById(req.params.offCodeId, (err, takenOffCode) =>
+            offCode.findById(req.params.off_code_id, (err, takenOffCode) =>
             {
                 if (err) res.status(500).send(err)
                 else if (!takenOffCode) res.status(404).send({message: "didn't found!"})
@@ -128,7 +128,7 @@ const deleteOffCode = (req, res) =>
                 {
                     if (takenOffCode.toJSON().usage === 0)
                     {
-                        offCode.deleteOne({_id: req.params.offCodeId}, (err) =>
+                        offCode.deleteOne({_id: req.params.off_code_id}, (err) =>
                         {
                             if (err) res.status(500).send(err)
                             else res.send({message: "deleted babe"})
@@ -138,7 +138,7 @@ const deleteOffCode = (req, res) =>
                 }
             })
         }
-        else res.status(400).send({message: "send offCodeId as param"})
+        else res.status(400).send({message: "send off_code_id as param"})
     }
     else res.status(403).send({message: "don't have permission babe!"})
 }

@@ -9,7 +9,7 @@ const offCodeRouter = (app) =>
         .get(offCodeController.getOffCodes)
         .post(offCodeController.addOffCode)
 
-    app.route("/off-code/:offCodeId")
+    app.route("/off-code/:off_code_id")
         .delete(offCodeController.deleteOffCode)
 
     app.route("/off-code/users/:code_id")

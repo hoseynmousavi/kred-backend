@@ -34,9 +34,6 @@ const classRouter = (app) =>
         .get(classController.getEducationResource)
         .post(classController.addEducationResource)
 
-    app.route("/education-resource/:education_id")
-        .get(classController.getEducationResourceById)
-
     app.route("/education-resource/like")
         .post(classController.addNewLike)
 
@@ -57,6 +54,9 @@ const classRouter = (app) =>
 
     app.route("/education-resource/comment/:comment_id")
         .delete(classController.deleteComment)
+
+    app.route("/education-resource/:education_id")
+        .get(classController.getEducationResourceById)
 }
 
 export default classRouter

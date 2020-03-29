@@ -6,7 +6,7 @@ const videoPackRouter = (app) =>
         .get(packController.getVideoPacks)
         .post(packController.addNewVideoPack)
 
-    app.route("/video-pack/:videoPackId")
+    app.route("/video-pack/:video_pack_id")
         .get(packController.getVideoPackById)
 }
 

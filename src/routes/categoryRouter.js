@@ -5,7 +5,7 @@ const categoryRouter = (app) =>
     app.route("/category")
         .get(categoryController.getCategories)
 
-    app.route("/category/:categoryId")
+    app.route("/category/:category_id")
         .get(categoryController.getCategoryById)
 }
 
