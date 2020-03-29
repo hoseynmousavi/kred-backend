@@ -86,6 +86,16 @@ const getLessonCategories = (req, res) =>
     else res.status(400).send({message: "send lesson_id as query param"})
 }
 
+const getLessonCategoryById = (req, res) =>
+{
+    lessonCategory.findOne({is_deleted: false, _id: req.params.category_id}, "title svg", null, (err, takenCategory) =>
+    {
+        if (err) res.status(500).send(err)
+        else if (!takenCategory) res.status(404).send({message: "not found!"})
+        else res.send(takenCategory)
+    })
+}
+
 const addLessonCategory = (req, res) =>
 {
     if (req.headers.authorization.role === "admin")
@@ -183,6 +193,16 @@ const getBlockCategories = (req, res) =>
         })
     }
     else res.status(400).send({message: "send block_id as query param"})
+}
+
+const getBlockCategoryById = (req, res) =>
+{
+    blockCategory.findOne({is_deleted: false, _id: req.params.category_id}, "title svg", null, (err, takenCategory) =>
+    {
+        if (err) res.status(500).send(err)
+        else if (!takenCategory) res.status(404).send({message: "not found!"})
+        else res.send(takenCategory)
+    })
 }
 
 const addBlockCategory = (req, res) =>
@@ -326,7 +346,7 @@ const deleteLike = (req, res) =>
         else if (statistic.deletedCount === 1)
         {
             educationResource.findOneAndUpdate(
-                {_id: req.params.educationId},
+                {_id: req.params.education_id},
                 {$inc: {likes_count: -1}},
                 {useFindAndModify: false},
                 (err) =>
@@ -366,13 +386,13 @@ const addNewCommentLike = (req, res) =>
 
 const deleteCommentLike = (req, res) =>
 {
-    commentLike.deleteOne({comment_id: req.params.commentId, user_id: req.headers.authorization._id}, (err, statistic) =>
+    commentLike.deleteOne({comment_id: req.params.comment_id, user_id: req.headers.authorization._id}, (err, statistic) =>
     {
         if (err) res.status(400).send(err)
         else if (statistic.deletedCount === 1)
         {
             comment.findOneAndUpdate(
-                {_id: req.params.commentId},
+                {_id: req.params.comment_id},
                 {$inc: {likes_count: -1}},
                 {useFindAndModify: false},
                 (err) =>
@@ -472,7 +492,7 @@ const getEducationComments = (req, res) =>
 {
     const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 50
     const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
-    comment.find({is_deleted: false, education_id: req.params.educationId, parent_comment_id: {$exists: false}}, "description reply_comment_id parent_comment_id created_date likes_count user_id", {sort: "-created_date", skip, limit}, (err, comments) =>
+    comment.find({is_deleted: false, education_id: req.params.education_id, parent_comment_id: {$exists: false}}, "description reply_comment_id parent_comment_id created_date likes_count user_id", {sort: "-created_date", skip, limit}, (err, comments) =>
     {
         if (err) res.status(400).send(err)
         else
@@ -523,14 +543,14 @@ const getEducationComments = (req, res) =>
 
 const deleteComment = (req, res) =>
 {
-    comment.findOne({_id: req.params.commentId, user_id: req.headers.authorization._id, is_deleted: false}, (err, takenComment) =>
+    comment.findOne({_id: req.params.comment_id, user_id: req.headers.authorization._id, is_deleted: false}, (err, takenComment) =>
     {
         if (err) res.status(400).send(err)
         else if (!takenComment) res.status(404).send({message: "comment not found!"})
         else
         {
             comment.findOneAndUpdate(
-                {_id: req.params.commentId, user_id: req.headers.authorization._id},
+                {_id: req.params.comment_id, user_id: req.headers.authorization._id},
                 {is_deleted: true},
                 {useFindAndModify: false},
                 (err) =>
@@ -560,11 +580,13 @@ const classController = {
     addLesson,
     getLessonById,
     getLessonCategories,
+    getLessonCategoryById,
     addLessonCategory,
     getBlocks,
     getBlockById,
     addBlock,
     getBlockCategories,
+    getBlockCategoryById,
     addBlockCategory,
     addEducationResource,
     getEducationResource,
