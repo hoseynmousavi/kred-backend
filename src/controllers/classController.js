@@ -393,13 +393,12 @@ const getEducationResource = (req, res) =>
     {
         let query = {is_deleted: false}
         const fields = "title likes_count university pages_count teacher subject type file"
-        const options = {sort: "-created_date"}
         if (type) query.type = type
         if (lesson_category_id) query.lesson_category_id = lesson_category_id
         if (block_category_id) query.block_category_id = block_category_id
         if (lesson_id) query.lesson_id = lesson_id
         if (block_id) query.block_id = block_id
-        educationResource.find(query, fields, options, (err, takenEducations) =>
+        educationResource.find(query, fields, null, (err, takenEducations) =>
         {
             if (err) res.status(400).send(err)
             else res.send(takenEducations)
@@ -407,7 +406,9 @@ const getEducationResource = (req, res) =>
     }
     else if (req.headers.authorization && req.headers.authorization.role === "admin")
     {
-        educationResource.find({is_deleted: false}, null, {sort: "-created_date"}, (err, takenEducations) =>
+        const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 50
+        const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
+        educationResource.find({is_deleted: false}, null, {sort: "-created_date", skip, limit}, (err, takenEducations) =>
         {
             if (err) res.status(400).send(err)
             else res.send(takenEducations)
