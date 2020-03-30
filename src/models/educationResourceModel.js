@@ -21,6 +21,9 @@ const educationResourceModel = new schema({
     teacher: {
         type: String,
     },
+    pages_count: {
+        type: String,
+    },
     subject: {
         type: String,
     },

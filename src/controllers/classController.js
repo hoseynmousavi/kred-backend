@@ -77,10 +77,18 @@ const getLessonCategories = (req, res) =>
     {
         let query = {is_deleted: false, lesson_id: req.query.lesson_id}
         if (req.query.title) query.title = new RegExp(req.query.title)
-        lessonCategory.find(query, "title svg", null, (err, lessons) =>
+        lessonCategory.find(query, "title svg", null, (err, categories) =>
         {
             if (err) res.status(500).send(err)
-            else res.send(lessons)
+            else res.send(categories)
+        })
+    }
+    else if (req.headers.authorization && req.headers.authorization.role === "admin")
+    {
+        lessonCategory.find({is_deleted: false}, (err, categories) =>
+        {
+            if (err) res.status(500).send(err)
+            else res.send(categories)
         })
     }
     else res.status(400).send({message: "send lesson_id as query param"})
@@ -186,10 +194,18 @@ const getBlockCategories = (req, res) =>
     {
         let query = {is_deleted: false, block_id: req.query.block_id}
         if (req.query.title) query.title = new RegExp(req.query.title)
-        blockCategory.find(query, "title svg", null, (err, lessons) =>
+        blockCategory.find(query, "title svg", null, (err, categories) =>
         {
             if (err) res.status(500).send(err)
-            else res.send(lessons)
+            else res.send(categories)
+        })
+    }
+    else if (req.headers.authorization && req.headers.authorization.role === "admin")
+    {
+        blockCategory.find({is_deleted: false}, (err, categories) =>
+        {
+            if (err) res.status(500).send(err)
+            else res.send(categories)
         })
     }
     else res.status(400).send({message: "send block_id as query param"})
@@ -288,13 +304,95 @@ const addEducationResource = (req, res) =>
     else res.status(403).send({message: "you don't have permission babe!"})
 }
 
+const updateEducationResource = (req, res) =>
+{
+    if (req.headers.authorization.role === "admin")
+    {
+        const file = req.files ? req.files.file : null
+        const picture = req.files ? req.files.picture : null
+        if (file)
+        {
+            const fileName = new Date().toISOString() + file.name
+            file.mv(`media/files/${fileName}`, (err) =>
+            {
+                if (err) res.status(500).send(err)
+                else
+                {
+                    if (picture)
+                    {
+                        const pictureName = new Date().toISOString() + picture.name
+                        picture.mv(`media/pictures/${pictureName}`, (err) =>
+                        {
+                            if (err) console.log(err)
+                            educationResource.findOneAndUpdate(
+                                {_id: req.body.education_id},
+                                {...req.body, file: `/media/files/${fileName}`, picture: `/media/pictures/${pictureName}`},
+                                {new: true, useFindAndModify: false, runValidators: true}, (err, updated) =>
+                                {
+                                    if (err) res.status(400).send(err)
+                                    else res.send(updated)
+                                },
+                            )
+                        })
+                    }
+                    else
+                    {
+                        educationResource.findOneAndUpdate(
+                            {_id: req.body.education_id},
+                            {...req.body, file: `/media/files/${fileName}`},
+                            {new: true, useFindAndModify: false, runValidators: true}, (err, updated) =>
+                            {
+                                if (err) res.status(400).send(err)
+                                else res.send(updated)
+                            },
+                        )
+                    }
+                }
+            })
+        }
+        else
+        {
+            if (picture)
+            {
+                const pictureName = new Date().toISOString() + picture.name
+                picture.mv(`media/pictures/${pictureName}`, (err) =>
+                {
+                    if (err) console.log(err)
+                    educationResource.findOneAndUpdate(
+                        {_id: req.body.education_id},
+                        {...req.body, picture: `/media/pictures/${pictureName}`},
+                        {new: true, useFindAndModify: false, runValidators: true}, (err, updated) =>
+                        {
+                            if (err) res.status(400).send(err)
+                            else res.send(updated)
+                        },
+                    )
+                })
+            }
+            else
+            {
+                educationResource.findOneAndUpdate(
+                    {_id: req.body.education_id},
+                    {...req.body},
+                    {new: true, useFindAndModify: false, runValidators: true}, (err, updated) =>
+                    {
+                        if (err) res.status(400).send(err)
+                        else res.send(updated)
+                    },
+                )
+            }
+        }
+    }
+    else res.status(403).send({message: "you don't have permission babe!"})
+}
+
 const getEducationResource = (req, res) =>
 {
     const {lesson_category_id, block_category_id, lesson_id, block_id, type} = req.query
     if (lesson_category_id || block_category_id || lesson_id || block_id)
     {
         let query = {is_deleted: false}
-        const fields = "title likes_count university teacher subject type file"
+        const fields = "title likes_count university pages_count teacher subject type file"
         const options = {sort: "-created_date"}
         if (type) query.type = type
         if (lesson_category_id) query.lesson_category_id = lesson_category_id
@@ -307,12 +405,20 @@ const getEducationResource = (req, res) =>
             else res.send(takenEducations)
         })
     }
+    else if (req.headers.authorization && req.headers.authorization.role === "admin")
+    {
+        educationResource.find({is_deleted: false}, null, {sort: "-created_date"}, (err, takenEducations) =>
+        {
+            if (err) res.status(400).send(err)
+            else res.send(takenEducations)
+        })
+    }
     else res.status(400).send({message: "please send lesson_category_id || block_category_id || lesson_id || block_id as query param"})
 }
 
 const getEducationResourceById = (req, res) =>
 {
-    educationResource.findOne({is_deleted: false, _id: req.params.education_id}, "title likes_count comments_count university teacher subject writer type picture file created_date", null, (err, takenEducation) =>
+    educationResource.findOne({is_deleted: false, _id: req.params.education_id}, "title likes_count comments_count university pages_count teacher subject writer type picture file created_date", null, (err, takenEducation) =>
     {
         if (err) res.status(500).send(err)
         else if (!takenEducation) res.status(404).send({message: "not found!"})
@@ -595,6 +701,7 @@ const classController = {
     getBlockCategoryById,
     addBlockCategory,
     addEducationResource,
+    updateEducationResource,
     getEducationResource,
     getEducationResourceById,
     addNewLike,
