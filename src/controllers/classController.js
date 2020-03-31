@@ -417,6 +417,15 @@ const getEducationResource = (req, res) =>
     else res.status(400).send({message: "please send lesson_category_id || block_category_id || lesson_id || block_id as query param"})
 }
 
+const getEducationResourceCount = (req, res) =>
+{
+    educationResource.countDocuments(null, (err, count) =>
+    {
+        if (err) res.status(500).send(err)
+        else res.send({count})
+    })
+}
+
 const getEducationResourceById = (req, res) =>
 {
     educationResource.findOne({is_deleted: false, _id: req.params.education_id}, "title likes_count comments_count university pages_count teacher subject writer type picture file created_date", null, (err, takenEducation) =>
@@ -704,6 +713,7 @@ const classController = {
     addEducationResource,
     updateEducationResource,
     getEducationResource,
+    getEducationResourceCount,
     getEducationResourceById,
     addNewLike,
     deleteLike,

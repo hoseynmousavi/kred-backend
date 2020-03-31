@@ -35,6 +35,9 @@ const classRouter = (app) =>
         .post(classController.addEducationResource)
         .patch(classController.updateEducationResource)
 
+    app.route("/education-resource/count")
+        .get(classController.getEducationResourceCount)
+
     app.route("/education-resource/like")
         .post(classController.addNewLike)
 

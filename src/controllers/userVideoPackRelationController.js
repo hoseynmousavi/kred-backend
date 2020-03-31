@@ -97,14 +97,14 @@ const getTodayUserVideoPack = (req, res) =>
 {
     if (req.headers.authorization.role === "admin")
     {
-        userVideoPackRelation.find({created_date: {$lt: new Date(), $gte: new Date().setDate(new Date().getDate() - 1)}}, (err, userPacks) =>
+        userVideoPackRelation.find({created_date: {$gte: new Date().setDate(new Date().getDate() - 1)}}, (err, userPacks) =>
         {
             if (err) res.status(500).send(err)
             else
             {
                 let userPacksObj = userPacks.reduce((sum, pack) => ({...sum, [pack._id]: {...pack.toJSON()}}), {})
 
-                buyVideoPackController.getBuyVideoPacks({condition: {is_done_successful: true, created_date: {$lt: new Date(), $gte: new Date().setDate(new Date().getDate() - 1)}}})
+                buyVideoPackController.getBuyVideoPacks({condition: {is_done_successful: true, created_date: {$gte: new Date().setDate(new Date().getDate() - 1)}}})
                     .then(result =>
                     {
                         const buyVideoPacksObj = result.buyVideoPacks.reduce((sum, buy) => ({...sum, [buy._id]: {...buy.toJSON()}}), {})
