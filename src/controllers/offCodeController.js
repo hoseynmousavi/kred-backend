@@ -14,13 +14,13 @@ const validateCodeFunc = ({code, user_id}) =>
             else if (!takenCode) reject({status: 404, err: {message: "کدی با این متن یافت نشد!"}})
             else
             {
-                if (takenCode.expire_date >= Date.now() && takenCode.usage < takenCode.max_usage && takenCode.users_who_use.indexOf(user_id) === -1)
+                if (takenCode.expire_date >= Date.now() && takenCode.usage < takenCode.max_usage && takenCode.users_who_use.filter(item => item.toString() === user_id.toString()).length < takenCode.max_usage_per_user)
                 {
                     resolve({status: 200, code: takenCode})
                 }
                 else
                 {
-                    if (!(takenCode.users_who_use.indexOf(user_id) === -1))
+                    if (!(takenCode.users_who_use.filter(item => item.toString() === user_id.toString()).length < takenCode.max_usage_per_user))
                     {
                         reject({status: 400, err: {message: "کد تخفیف قبلا توسط شما استفاده شده است!"}})
                     }

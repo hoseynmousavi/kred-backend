@@ -12,6 +12,10 @@ const offCodeModel = new schema({
         type: Number,
         default: 0,
     },
+    max_usage_per_user: {
+        type: Number,
+        default: 1,
+    },
     amount: {
         type: Number,
         required: "Enter amount!",
