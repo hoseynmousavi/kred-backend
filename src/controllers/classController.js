@@ -392,7 +392,7 @@ const getEducationResource = (req, res) =>
     if (lesson_category_id || block_category_id || lesson_id || block_id)
     {
         let query = {is_deleted: false}
-        const fields = "title likes_count university pages_count teacher subject type file"
+        const fields = "title likes_count comments_count university pages_count teacher subject type file"
         if (type) query.type = type
         if (lesson_category_id) query.lesson_category_id = lesson_category_id
         if (block_category_id) query.block_category_id = block_category_id
@@ -432,7 +432,23 @@ const getEducationResourceById = (req, res) =>
     {
         if (err) res.status(500).send(err)
         else if (!takenEducation) res.status(404).send({message: "not found!"})
-        else res.send(takenEducation)
+        else
+        {
+            if (req.headers.authorization)
+            {
+                const user_id = req.headers.authorization._id
+                like.findOne({user_id, education_id: req.params.education_id}, (err, takenLike) =>
+                {
+                    if (err) res.status(500).send(err)
+                    else
+                    {
+                        const is_liked = takenLike !== null
+                        res.send({...takenEducation.toJSON(), is_liked})
+                    }
+                })
+            }
+            else res.send(takenEducation)
+        }
     })
 }
 
