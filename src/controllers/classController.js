@@ -561,7 +561,7 @@ const addNewComment = (req, res) =>
                 {_id: req.body.education_id},
                 {$inc: {comments_count: 1}},
                 {useFindAndModify: false},
-                (err) =>
+                (err, updatedEducation) =>
                 {
                     if (err) res.status(500).send(err)
                     else
@@ -588,7 +588,9 @@ const addNewComment = (req, res) =>
                                                         title: `${req.headers.authorization.name} پاسخ کامنت شما را داده است!`,
                                                         image: data.restful_url + req.headers.authorization.avatar,
                                                         icon: data.domain_url + "/logo192.png",
-                                                        url: data.domain_url, // TODO Hoseyn fix it
+                                                        url: data.domain_url +
+                                                            `/class/lesson/${updatedEducation.lesson_category_id || updatedEducation.block_category_id || updatedEducation.lesson_id || updatedEducation.block_id}/resources/` +
+                                                            updatedEducation._id,
                                                         body: createdComment.description,
                                                         tag: createdComment._id.toString() + "reply",
                                                         requireInteraction: true,
@@ -610,7 +612,9 @@ const addNewComment = (req, res) =>
                                         user_id: data.adminIds[i],
                                         title: `ادمین! ${req.headers.authorization.name || req.headers.authorization.phone} برامون کامنت گذاشته!`,
                                         icon: data.domain_url + "/logo192.png",
-                                        url: data.domain_url, // TODO Hoseyn fix it
+                                        url: data.domain_url +
+                                            `/class/lesson/${updatedEducation.lesson_category_id || updatedEducation.block_category_id || updatedEducation.lesson_id || updatedEducation.block_id}/resources/` +
+                                            updatedEducation._id,
                                         body: createdComment.description,
                                         tag: createdComment._id.toString() + "admin",
                                         requireInteraction: true,
