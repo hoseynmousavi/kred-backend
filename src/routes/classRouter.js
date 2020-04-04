@@ -44,6 +44,12 @@ const classRouter = (app) =>
     app.route("/education-resource/like/:education_id")
         .delete(classController.deleteLike)
 
+    app.route("/education-resource/save")
+        .post(classController.addNewSave)
+
+    app.route("/education-resource/save/:education_id")
+        .delete(classController.deleteSave)
+
     app.route("/education-resource/comment/like")
         .post(classController.addNewCommentLike)
 

@@ -10,6 +10,7 @@ import educationCommentLikeModel from "../models/educationCommentLikeModel"
 import userController from "./userController"
 import notificationController from "./notificationController"
 import data from "../data"
+import educationSaveModel from "../models/educationSaveModel"
 
 const lesson = mongoose.model("lesson", lessonModel)
 const lessonCategory = mongoose.model("lessonCategory", lessonCategoryModel)
@@ -18,6 +19,7 @@ const blockCategory = mongoose.model("blockCategory", blockCategoryModel)
 const educationResource = mongoose.model("educationResource", educationResourceModel)
 const comment = mongoose.model("educationComment", educationCommentModel)
 const like = mongoose.model("educationLike", educationLikeModel)
+const save = mongoose.model("educationSave", educationSaveModel)
 const commentLike = mongoose.model("educationCommentLike", educationCommentLikeModel)
 
 const getLessons = (req, res) =>
@@ -308,6 +310,8 @@ const updateEducationResource = (req, res) =>
 {
     if (req.headers.authorization.role === "admin")
     {
+        delete req.body.type
+
         const file = req.files ? req.files.file : null
         const picture = req.files ? req.files.picture : null
         if (file)
@@ -443,7 +447,15 @@ const getEducationResourceById = (req, res) =>
                     else
                     {
                         const is_liked = takenLike !== null
-                        res.send({...takenEducation.toJSON(), is_liked})
+                        save.findOne({user_id, education_id: req.params.education_id}, (err, takenSave) =>
+                        {
+                            if (err) res.status(500).send(err)
+                            else
+                            {
+                                const is_saved = takenSave !== null
+                                res.send({...takenEducation.toJSON(), is_saved, is_liked})
+                            }
+                        })
                     }
                 })
             }
@@ -717,6 +729,45 @@ const deleteComment = (req, res) =>
     })
 }
 
+const addNewSave = (req, res) =>
+{
+    delete req.body.created_date
+    const user_id = req.headers.authorization._id
+    const {education_id} = req.body
+    if (education_id && user_id)
+    {
+        educationResource.findOne({is_deleted: false, _id: education_id}, (err, takenEducation) =>
+        {
+            if (err) res.status(400).send(err)
+            else if (!takenEducation) res.status(404).send({message: "education not found!"})
+            else
+            {
+                const newSave = new save({user_id, education_id, education_type: takenEducation.toJSON().type})
+                newSave.save((err, createdSave) =>
+                {
+                    if (err) res.status(400).send(err)
+                    else res.send(createdSave)
+                })
+            }
+        })
+    }
+    else res.status(400).send({message: "send education_id!"})
+}
+
+const deleteSave = (req, res) =>
+{
+    save.deleteOne({education_id: req.params.education_id, user_id: req.headers.authorization._id}, (err, statistic) =>
+    {
+        if (err) res.status(400).send(err)
+        else if (statistic.deletedCount === 1)
+        {
+            if (err) res.status(500).send(err)
+            else res.send({message: "save deleted successfully"})
+        }
+        else res.status(404).send({message: "save not found!"})
+    })
+}
+
 const classController = {
     getLessons,
     addLesson,
@@ -742,6 +793,8 @@ const classController = {
     addNewComment,
     getEducationComments,
     deleteComment,
+    addNewSave,
+    deleteSave,
 }
 
 export default classController
