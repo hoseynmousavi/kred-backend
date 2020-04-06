@@ -31,8 +31,8 @@ const getSiteMap = (req, res) =>
                                             res.send(
                                                 staticUrls +
                                                 videos.reduce((sum, video) => `${sum}https://www.kred.ir/videos/${video}\n`, "") +
-                                                lessonSiteMap +
-                                                blockSiteMap +
+                                                // lessonSiteMap +
+                                                // blockSiteMap +
                                                 conversations.reduce((sum, conversation) => `${sum}https://www.kred.ir/pavilions/${conversation}\n`, "") +
                                                 exchanges.reduce((sum, exchange) => `${sum}https://www.kred.ir/exchanges/${exchange}\n`, ""),
                                             )
