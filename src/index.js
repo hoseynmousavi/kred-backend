@@ -25,6 +25,7 @@ import mailRouter from "./routes/mailRouter"
 import fileRouter from "./routes/fileRouter"
 import notificationRouter from "./routes/notificationRouter"
 import classRouter from "./routes/classRouter"
+import siteMapRouter from "./routes/siteMapRouter"
 
 // Normal Things Never Leave Us Alone ...
 const app = express()
@@ -60,6 +61,7 @@ mailRouter(app)
 notificationRouter(app)
 classRouter(app)
 fileRouter(app, __dirname)
+siteMapRouter(app, __dirname)
 notFoundRooter(app) // & at the end
 
 // Eventually Run The Server

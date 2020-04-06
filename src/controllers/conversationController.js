@@ -12,6 +12,8 @@ const comment = mongoose.model("conversationComment", conversationCommentModel)
 const like = mongoose.model("conversationLike", conversationLikeModel)
 const commentLike = mongoose.model("conversationCommentLike", conversationCommentLikeModel)
 
+const getConversationDistinct = () => conversation.distinct("_id")
+
 const getConversations = (req, res) =>
 {
     const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 5
@@ -505,6 +507,7 @@ const deleteComment = (req, res) =>
 }
 
 const conversationController = {
+    getConversationDistinct,
     getConversations,
     getConversationById,
     addNewConversation,

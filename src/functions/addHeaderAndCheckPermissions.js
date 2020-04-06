@@ -25,6 +25,7 @@ const addHeaderAndCheckPermissions = (app) =>
             (req.originalUrl.slice(0, 11) === "/subtitles/" && req.method === "GET") ||
             (req.originalUrl.slice(0, 7) === "/lesson" && req.method === "GET") ||
             (req.originalUrl.slice(0, 19) === "/education-resource" && req.method === "GET") ||
+            (req.originalUrl.slice(0, 9) === "/site-map" && req.method === "GET") ||
             (req.originalUrl.slice(0, 6) === "/block" && req.method === "GET")
         )
         {

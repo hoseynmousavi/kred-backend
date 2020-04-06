@@ -22,6 +22,118 @@ const like = mongoose.model("educationLike", educationLikeModel)
 const save = mongoose.model("educationSave", educationSaveModel)
 const commentLike = mongoose.model("educationCommentLike", educationCommentLikeModel)
 
+const getLessonSiteMap = () =>
+{
+    return new Promise((resolve, reject) =>
+    {
+        let urls = ""
+        lesson.find({is_deleted: false}, (err, lessons) =>
+        {
+            if (err) reject({status: 500, err})
+            else
+            {
+                lessons.forEach((lessonItem, lessonIndex) =>
+                {
+                    lessonCategory.find({is_deleted: false, lesson_id: lessonItem.toJSON()._id}, (err, lessonCategories) =>
+                    {
+                        if (err) reject({status: 500, err})
+                        else
+                        {
+                            if (lessonCategories.length > 0)
+                            {
+                                lessonCategories.forEach((categoryItem, categoryIndex) =>
+                                {
+                                    educationResource.find({is_deleted: false, lesson_category_id: categoryItem.toJSON()._id}, (err, lessonCategoryEducations) =>
+                                    {
+                                        if (err) reject({status: 500, err})
+                                        else
+                                        {
+                                            lessonCategoryEducations.forEach(item =>
+                                                urls = urls + `https://www.kred.ir/class/lesson/${lessonItem.toJSON()._id}/${categoryItem.toJSON()._id}/resources/${item.toJSON()._id}\n`,
+                                            )
+                                            if (lessonIndex === lessons.length - 1 && categoryIndex === lessonCategories.length - 1) resolve(urls)
+                                        }
+                                    })
+                                })
+                            }
+                            else
+                            {
+                                educationResource.find({is_deleted: false, lesson_id: lessonItem.toJSON()._id}, (err, lessonCategoryEducations) =>
+                                {
+                                    if (err) reject({status: 500, err})
+                                    else
+                                    {
+                                        lessonCategoryEducations.forEach(item =>
+                                            urls = urls + `https://www.kred.ir/class/lesson/${lessonItem.toJSON()._id}/resources/${item.toJSON()._id}\n`,
+                                        )
+                                        if (lessonIndex === lessons.length - 1) resolve(urls)
+                                    }
+                                })
+                            }
+                        }
+                    })
+                })
+            }
+        })
+    })
+}
+
+const getBlockSiteMap = () =>
+{
+    return new Promise((resolve, reject) =>
+    {
+        let urls = ""
+        block.find({is_deleted: false}, (err, blocks) =>
+        {
+            if (err) reject({status: 500, err})
+            else
+            {
+                blocks.forEach((blockItem, blockIndex) =>
+                {
+                    blockCategory.find({is_deleted: false, block_id: blockItem.toJSON()._id}, (err, blockCategories) =>
+                    {
+                        if (err) reject({status: 500, err})
+                        else
+                        {
+                            if (blockCategories.length > 0)
+                            {
+                                blockCategories.forEach((categoryItem, categoryIndex) =>
+                                {
+                                    educationResource.find({is_deleted: false, block_category_id: categoryItem.toJSON()._id}, (err, blockCategoryEducations) =>
+                                    {
+                                        if (err) reject({status: 500, err})
+                                        else
+                                        {
+                                            blockCategoryEducations.forEach(item =>
+                                                urls = urls + `https://www.kred.ir/class/block/${blockItem.toJSON()._id}/${categoryItem.toJSON()._id}/resources/${item.toJSON()._id}\n`,
+                                            )
+                                            if (blockIndex === blocks.length - 1 && categoryIndex === blockCategories.length - 1) resolve(urls)
+                                        }
+                                    })
+                                })
+                            }
+                            else
+                            {
+                                educationResource.find({is_deleted: false, block_id: blockItem.toJSON()._id}, (err, blockCategoryEducations) =>
+                                {
+                                    if (err) reject({status: 500, err})
+                                    else
+                                    {
+                                        blockCategoryEducations.forEach(item =>
+                                            urls = urls + `https://www.kred.ir/class/block/${blockItem.toJSON()._id}/resources/${item.toJSON()._id}\n`,
+                                        )
+                                        if (blockIndex === blocks.length - 1) resolve(urls)
+                                    }
+                                })
+                            }
+                        }
+                    })
+                })
+            }
+        })
+    })
+}
+
 const getLessons = (req, res) =>
 {
     lesson.find({is_deleted: false}, "title svg", null, (err, lessons) =>
@@ -769,6 +881,8 @@ const deleteSave = (req, res) =>
 }
 
 const classController = {
+    getLessonSiteMap,
+    getBlockSiteMap,
     getLessons,
     addLesson,
     getLessonById,

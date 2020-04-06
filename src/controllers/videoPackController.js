@@ -6,6 +6,8 @@ import userVideoPackRelationController from "./userVideoPackRelationController"
 
 const videoPack = mongoose.model("videoPack", videoPackModel)
 
+const getVideoPackDistinct = () => videoPack.distinct("_id")
+
 const getVideoPacks = (req, res) =>
 {
     const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
@@ -157,6 +159,7 @@ const addNewVideoPack = (req, res) =>
 }
 
 const videoPackController = {
+    getVideoPackDistinct,
     getVideoPacks,
     addNewVideoPack,
     getVideoPackById,

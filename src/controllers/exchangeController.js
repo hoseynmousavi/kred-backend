@@ -8,6 +8,8 @@ const exchange = mongoose.model("exchange", exchangeModel)
 const exchangeCategory = mongoose.model("exchangeCategory", exchangeCategoryRelationModel)
 const category = mongoose.model("category", categoryModel)
 
+const getExchangesDistinct = () => exchange.distinct("_id")
+
 const getExchanges = (req, res) =>
 {
     const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
@@ -148,6 +150,7 @@ const deleteExchangeById = (req, res) =>
 }
 
 const exchangeController = {
+    getExchangesDistinct,
     getExchanges,
     addNewExchange,
     deleteExchangeById,
