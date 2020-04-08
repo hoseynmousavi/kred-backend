@@ -10,8 +10,6 @@ const videoModel = new schema({
     },
     title: {
         type: String,
-        minlength: 1,
-        maxlength: 60,
         required: "Enter title!",
     },
     is_free: {
@@ -24,7 +22,6 @@ const videoModel = new schema({
     },
     subtitle_url: {
         type: String,
-        required: "Enter subtitle_url!",
     },
     duration_min: {
         type: Number,

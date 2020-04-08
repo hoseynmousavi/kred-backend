@@ -17,9 +17,9 @@ const videoPackModel = new schema({
         type: Number,
         required: "Enter off_percent!",
     },
-    company_id: {
+    company_category_id: {
         type: schema.Types.ObjectId,
-        required: "Enter company_id!",
+        required: "Enter company_category_id!",
         ref: "company",
     },
     category_id: {
