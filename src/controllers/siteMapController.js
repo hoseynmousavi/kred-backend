@@ -8,9 +8,9 @@ const getSiteMap = (req, res) =>
     const staticUrls =
         "https://www.kred.ir\n" +
         "https://www.kred.ir/videos\n" +
-        "https://www.kred.ir/class\n" +
-        "https://www.kred.ir/exchanges\n" +
+        // "https://www.kred.ir/class\n" + // remove
         "https://www.kred.ir/pavilions\n" +
+        "https://www.kred.ir/exchanges\n" +
         "https://www.kred.ir/sign-up\n"
 
     videoPackController.getVideoPackDistinct()

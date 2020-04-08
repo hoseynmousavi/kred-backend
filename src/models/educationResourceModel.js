@@ -30,6 +30,10 @@ const educationResourceModel = new schema({
     writer: {
         type: String,
     },
+    is_many: {
+        type: Boolean,
+        required: "Enter is_many!",
+    },
     type: {
         type: String,
         enum: ["handout", "voice", "question", "summary"],

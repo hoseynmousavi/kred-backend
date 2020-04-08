@@ -508,7 +508,7 @@ const getEducationResource = (req, res) =>
     if (lesson_category_id || block_category_id || lesson_id || block_id)
     {
         let query = {is_deleted: false}
-        const fields = "title likes_count comments_count university pages_count teacher subject type file"
+        const fields = "title likes_count comments_count is_many university pages_count teacher subject type file"
         if (type) query.type = type
         if (lesson_category_id) query.lesson_category_id = lesson_category_id
         if (block_category_id) query.block_category_id = block_category_id
@@ -544,7 +544,7 @@ const getEducationResourceCount = (req, res) =>
 
 const getEducationResourceById = (req, res) =>
 {
-    educationResource.findOne({is_deleted: false, _id: req.params.education_id}, "title likes_count comments_count university pages_count teacher subject writer type picture file created_date", null, (err, takenEducation) =>
+    educationResource.findOne({is_deleted: false, _id: req.params.education_id}, "title likes_count comments_count is_many university pages_count teacher subject writer type picture file created_date", null, (err, takenEducation) =>
     {
         if (err) res.status(500).send(err)
         else if (!takenEducation) res.status(404).send({message: "not found!"})
