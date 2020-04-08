@@ -154,9 +154,24 @@ const getAllSignUps = (req, res) =>
         userController.getUsers({condition: null, options})
             .then(result =>
             {
-                userController.getUsersCount({condition: null})
-                    .then((resultCount) => res.send({users: result.users, count: resultCount.users}))
-                    .catch(result => res.status(result.status).send(result.err))
+                view.aggregate([
+                    {$match: {user_id: {$in: result.users.reduce((sum, user) => [...sum, user.toJSON()._id], [])}}},
+                    {$group: {_id: "$user_id", count: {$sum: 1}}},
+                    {$sort: {count: -1}},
+                ], (err, takenStats) =>
+                {
+                    if (err) res.status(500).send(err)
+                    else
+                    {
+                        if (skip === 0)
+                        {
+                            userController.getUsersCount({condition: null})
+                                .then((resultCount) => res.send({users: result.users, count: resultCount.users, stats: takenStats}))
+                                .catch(result => res.status(result.status).send(result.err))
+                        }
+                        else res.send({users: result.users, stats: takenStats})
+                    }
+                })
             })
             .catch(result => res.status(result.status).send(result.err))
     }
