@@ -11,6 +11,7 @@ import userController from "./userController"
 import notificationController from "./notificationController"
 import data from "../data"
 import educationSaveModel from "../models/educationSaveModel"
+import videoPackController from "./videoPackController"
 
 const lesson = mongoose.model("lesson", lessonModel)
 const lessonCategory = mongoose.model("lessonCategory", lessonCategoryModel)
@@ -32,46 +33,38 @@ const getLessonSiteMap = () =>
             if (err) reject({status: 500, err})
             else
             {
-                lessons.forEach((lessonItem, lessonIndex) =>
+                lessonCategory.find({is_deleted: false}, (err, lessonCategories) =>
                 {
-                    lessonCategory.find({is_deleted: false, lesson_id: lessonItem.toJSON()._id}, (err, lessonCategories) =>
+                    if (err) reject({status: 500, err})
+                    else
                     {
-                        if (err) reject({status: 500, err})
-                        else
+                        educationResource.find({is_deleted: false}, (err, lessonCategoryEducations) =>
                         {
-                            if (lessonCategories.length > 0)
-                            {
-                                lessonCategories.forEach((categoryItem, categoryIndex) =>
-                                {
-                                    educationResource.find({is_deleted: false, lesson_category_id: categoryItem.toJSON()._id}, (err, lessonCategoryEducations) =>
-                                    {
-                                        if (err) reject({status: 500, err})
-                                        else
-                                        {
-                                            lessonCategoryEducations.forEach(item =>
-                                                urls = urls + `https://www.kred.ir/class/lesson/${lessonItem.toJSON()._id}/${categoryItem.toJSON()._id}/resources/${item.toJSON()._id}\n`,
-                                            )
-                                            if (lessonIndex === lessons.length - 1 && categoryIndex === lessonCategories.length - 1) resolve(urls)
-                                        }
-                                    })
-                                })
-                            }
+                            if (err) reject({status: 500, err})
                             else
                             {
-                                educationResource.find({is_deleted: false, lesson_id: lessonItem.toJSON()._id}, (err, lessonCategoryEducations) =>
+                                lessons.forEach((lessonItem) =>
                                 {
-                                    if (err) reject({status: 500, err})
+                                    if (lessonCategories.filter(cat => cat.lesson_id && cat.lesson_id.toString() === lessonItem._id.toString()).length > 0)
+                                    {
+                                        lessonCategories.filter(cat => cat.lesson_id && cat.lesson_id.toString() === lessonItem._id.toString()).forEach((categoryItem) =>
+                                        {
+                                            lessonCategoryEducations.filter(edu => edu.lesson_category_id && edu.lesson_category_id.toString() === categoryItem._id.toString()).forEach(item =>
+                                                urls = urls + `https://www.kred.ir/class/lesson/${lessonItem._id}/${categoryItem._id}/resources/${item._id}\n`,
+                                            )
+                                        })
+                                    }
                                     else
                                     {
-                                        lessonCategoryEducations.forEach(item =>
-                                            urls = urls + `https://www.kred.ir/class/lesson/${lessonItem.toJSON()._id}/resources/${item.toJSON()._id}\n`,
+                                        lessonCategoryEducations.filter(edu => edu.lesson_id && edu.lesson_id.toString() === lessonItem._id.toString()).forEach(item =>
+                                            urls = urls + `https://www.kred.ir/class/lesson/${lessonItem._id}/resources/${item._id}\n`,
                                         )
-                                        if (lessonIndex === lessons.length - 1) resolve(urls)
                                     }
                                 })
+                                resolve(urls)
                             }
-                        }
-                    })
+                        })
+                    }
                 })
             }
         })
@@ -88,46 +81,38 @@ const getBlockSiteMap = () =>
             if (err) reject({status: 500, err})
             else
             {
-                blocks.forEach((blockItem, blockIndex) =>
+                blockCategory.find({is_deleted: false}, (err, blockCategories) =>
                 {
-                    blockCategory.find({is_deleted: false, block_id: blockItem.toJSON()._id}, (err, blockCategories) =>
+                    if (err) reject({status: 500, err})
+                    else
                     {
-                        if (err) reject({status: 500, err})
-                        else
+                        educationResource.find({is_deleted: false}, (err, blockCategoryEducations) =>
                         {
-                            if (blockCategories.length > 0)
-                            {
-                                blockCategories.forEach((categoryItem, categoryIndex) =>
-                                {
-                                    educationResource.find({is_deleted: false, block_category_id: categoryItem.toJSON()._id}, (err, blockCategoryEducations) =>
-                                    {
-                                        if (err) reject({status: 500, err})
-                                        else
-                                        {
-                                            blockCategoryEducations.forEach(item =>
-                                                urls = urls + `https://www.kred.ir/class/block/${blockItem.toJSON()._id}/${categoryItem.toJSON()._id}/resources/${item.toJSON()._id}\n`,
-                                            )
-                                            if (blockIndex === blocks.length - 1 && categoryIndex === blockCategories.length - 1) resolve(urls)
-                                        }
-                                    })
-                                })
-                            }
+                            if (err) reject({status: 500, err})
                             else
                             {
-                                educationResource.find({is_deleted: false, block_id: blockItem.toJSON()._id}, (err, blockCategoryEducations) =>
+                                blocks.forEach((blockItem) =>
                                 {
-                                    if (err) reject({status: 500, err})
+                                    if (blockCategories.filter(cat => cat.block_id && cat.block_id.toString() === blockItem._id.toString()).length > 0)
+                                    {
+                                        blockCategories.filter(cat => cat.block_id && cat.block_id.toString() === blockItem._id.toString()).forEach((categoryItem) =>
+                                        {
+                                            blockCategoryEducations.filter(edu => edu.block_category_id && edu.block_category_id.toString() === categoryItem._id.toString()).forEach(item =>
+                                                urls = urls + `https://www.kred.ir/class/block/${blockItem._id}/${categoryItem._id}/resources/${item._id}\n`,
+                                            )
+                                        })
+                                    }
                                     else
                                     {
-                                        blockCategoryEducations.forEach(item =>
-                                            urls = urls + `https://www.kred.ir/class/block/${blockItem.toJSON()._id}/resources/${item.toJSON()._id}\n`,
+                                        blockCategoryEducations.filter(edu => edu.block_id && edu.block_id.toString() === blockItem._id.toString()).forEach(item =>
+                                            urls = urls + `https://www.kred.ir/class/block/${blockItem._id}/resources/${item._id}\n`,
                                         )
-                                        if (blockIndex === blocks.length - 1) resolve(urls)
                                     }
                                 })
+                                resolve(urls)
                             }
-                        }
-                    })
+                        })
+                    }
                 })
             }
         })
@@ -191,10 +176,33 @@ const getLessonCategories = (req, res) =>
     {
         let query = {is_deleted: false, lesson_id: req.query.lesson_id}
         if (req.query.title) query.title = new RegExp(req.query.title)
-        lessonCategory.find(query, "title svg", null, (err, categories) =>
+        lessonCategory.find(query, "title svg video_pack_id", null, (err, categories) =>
         {
+            let categoriesObject = categories.reduce((sum, category) => ({...sum, [category._id]: category.toJSON()}), {})
             if (err) res.status(500).send(err)
-            else res.send(categories)
+            else
+            {
+                videoPackController.getVideoPacksFunc({condition: {_id: {$in: Object.values(categoriesObject).reduce((sum, cat) => [...sum, ...cat.video_pack_id], [])}}, fields: "title"})
+                    .then(result =>
+                    {
+                        const packs = result.takenVideoPacks.reduce((sum, pack) => ({...sum, [pack._id]: pack.toJSON()}), {})
+                        Object.values(categoriesObject).forEach(cat =>
+                        {
+                            if (cat.video_pack_id && cat.video_pack_id.length > 0)
+                            {
+                                categoriesObject[cat._id].videos = []
+                                cat.video_pack_id.forEach(item =>
+                                {
+                                    categoriesObject[cat._id].videos = [...categoriesObject[cat._id].videos, packs[item._id]]
+                                })
+                                delete categoriesObject[cat._id].video_pack_id
+                            }
+                            else delete categoriesObject[cat._id].video_pack_id
+                        })
+                        res.send(Object.values(categoriesObject))
+                    })
+                    .catch(err => res.status(err.status || 500).send(err.err))
+            }
         })
     }
     else if (req.headers.authorization && req.headers.authorization.role === "admin")
@@ -210,7 +218,7 @@ const getLessonCategories = (req, res) =>
 
 const getLessonCategoryById = (req, res) =>
 {
-    lessonCategory.findOne({is_deleted: false, _id: req.params.category_id}, "title svg", null, (err, takenCategory) =>
+    lessonCategory.findOne({is_deleted: false, _id: req.params.category_id}, "title svg video_pack_id", null, (err, takenCategory) =>
     {
         if (err) res.status(500).send(err)
         else if (!takenCategory) res.status(404).send({message: "not found!"})
@@ -308,10 +316,33 @@ const getBlockCategories = (req, res) =>
     {
         let query = {is_deleted: false, block_id: req.query.block_id}
         if (req.query.title) query.title = new RegExp(req.query.title)
-        blockCategory.find(query, "title svg", null, (err, categories) =>
+        blockCategory.find(query, "title svg video_pack_id", (err, categories) =>
         {
+            let categoriesObject = categories.reduce((sum, category) => ({...sum, [category._id]: category.toJSON()}), {})
             if (err) res.status(500).send(err)
-            else res.send(categories)
+            else
+            {
+                videoPackController.getVideoPacksFunc({condition: {_id: {$in: Object.values(categoriesObject).reduce((sum, cat) => [...sum, ...cat.video_pack_id], [])}}, fields: "title"})
+                    .then(result =>
+                    {
+                        const packs = result.takenVideoPacks.reduce((sum, pack) => ({...sum, [pack._id]: pack.toJSON()}), {})
+                        Object.values(categoriesObject).forEach(cat =>
+                        {
+                            if (cat.video_pack_id && cat.video_pack_id.length > 0)
+                            {
+                                categoriesObject[cat._id].videos = []
+                                cat.video_pack_id.forEach(item =>
+                                {
+                                    categoriesObject[cat._id].videos = [...categoriesObject[cat._id].videos, packs[item._id]]
+                                })
+                                delete categoriesObject[cat._id].video_pack_id
+                            }
+                            else delete categoriesObject[cat._id].video_pack_id
+                        })
+                        res.send(Object.values(categoriesObject))
+                    })
+                    .catch(err => res.status(err.status || 500).send(err.err))
+            }
         })
     }
     else if (req.headers.authorization && req.headers.authorization.role === "admin")
@@ -327,7 +358,7 @@ const getBlockCategories = (req, res) =>
 
 const getBlockCategoryById = (req, res) =>
 {
-    blockCategory.findOne({is_deleted: false, _id: req.params.category_id}, "title svg", null, (err, takenCategory) =>
+    blockCategory.findOne({is_deleted: false, _id: req.params.category_id}, "title svg video_pack_id", null, (err, takenCategory) =>
     {
         if (err) res.status(500).send(err)
         else if (!takenCategory) res.status(404).send({message: "not found!"})

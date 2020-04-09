@@ -115,11 +115,11 @@ const getPureVideoPackById = ({videoPackId}) =>
     })
 }
 
-const getVideoPacksFunc = ({condition}) =>
+const getVideoPacksFunc = ({condition, fields}) =>
 {
     return new Promise((resolve, reject) =>
     {
-        videoPack.find(condition, (err, takenVideoPacks) =>
+        videoPack.find(condition, fields, (err, takenVideoPacks) =>
         {
             if (err) reject({status: 500, err})
             else resolve({status: 200, takenVideoPacks})
