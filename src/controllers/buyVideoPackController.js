@@ -41,10 +41,7 @@ const getLinkForPay = (req, res) =>
                                     })
                                     .catch((resultCode) => res.status(resultCode.status || 500).send(resultCode.err))
                             }
-                            else
-                            {
-                                shopVideoPack({user_id, video_pack_id, price: result.videoPack.price, res})
-                            }
+                            else shopVideoPack({user_id, video_pack_id, price: result.videoPack.price, res})
                         })
                         .catch((err) => res.status(err.status || 500).send(err.err))
                 }
