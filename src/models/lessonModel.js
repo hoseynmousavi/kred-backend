@@ -13,6 +13,10 @@ const lessonModel = new schema({
         type: String,
         required: "Enter svg!",
     },
+    video_pack_id: {
+        type: [schema.Types.ObjectId],
+        ref: "videoPack",
+    },
     is_deleted: {
         type: Boolean,
         default: false,

@@ -178,10 +178,10 @@ const getLessonCategories = (req, res) =>
         if (req.query.title) query.title = new RegExp(req.query.title)
         lessonCategory.find(query, "title svg video_pack_id", null, (err, categories) =>
         {
-            let categoriesObject = categories.reduce((sum, category) => ({...sum, [category._id]: category.toJSON()}), {})
             if (err) res.status(500).send(err)
             else
             {
+                let categoriesObject = categories.reduce((sum, category) => ({...sum, [category._id]: category.toJSON()}), {})
                 videoPackController.getVideoPacksFunc({condition: {_id: {$in: Object.values(categoriesObject).reduce((sum, cat) => [...sum, ...cat.video_pack_id], [])}}, fields: "title"})
                     .then(result =>
                     {
@@ -218,7 +218,7 @@ const getLessonCategories = (req, res) =>
 
 const getLessonCategoryById = (req, res) =>
 {
-    lessonCategory.findOne({is_deleted: false, _id: req.params.category_id}, "title svg video_pack_id", null, (err, takenCategory) =>
+    lessonCategory.findOne({is_deleted: false, _id: req.params.category_id}, "title svg", null, (err, takenCategory) =>
     {
         if (err) res.status(500).send(err)
         else if (!takenCategory) res.status(404).send({message: "not found!"})
@@ -261,10 +261,32 @@ const addLessonCategory = (req, res) =>
 
 const getBlocks = (req, res) =>
 {
-    block.find({is_deleted: false}, "title svg", null, (err, blocks) =>
+    block.find({is_deleted: false}, "title svg video_pack_id", null, (err, blocks) =>
     {
         if (err) res.status(500).send(err)
-        else res.send(blocks)
+        else
+        {
+            let blocksObject = blocks.reduce((sum, block) => ({...sum, [block._id]: block.toJSON()}), {})
+            videoPackController.getVideoPacksFunc({condition: {_id: {$in: Object.values(blocksObject).reduce((sum, cat) => [...sum, ...cat.video_pack_id], [])}}, fields: "title"})
+                .then(result =>
+                {
+                    const packs = result.takenVideoPacks.reduce((sum, pack) => ({...sum, [pack._id]: pack.toJSON()}), {})
+                    Object.values(blocksObject).forEach(cat =>
+                    {
+                        if (cat.video_pack_id && cat.video_pack_id.length > 0)
+                        {
+                            blocksObject[cat._id].videos = []
+                            cat.video_pack_id.forEach(item =>
+                                blocksObject[cat._id].videos = [...blocksObject[cat._id].videos, packs[item._id]]
+                            )
+                            delete blocksObject[cat._id].video_pack_id
+                        }
+                        else delete blocksObject[cat._id].video_pack_id
+                    })
+                    res.send(Object.values(blocksObject))
+                })
+                .catch(err => res.status(err.status || 500).send(err.err))
+        }
     })
 }
 
@@ -358,7 +380,7 @@ const getBlockCategories = (req, res) =>
 
 const getBlockCategoryById = (req, res) =>
 {
-    blockCategory.findOne({is_deleted: false, _id: req.params.category_id}, "title svg video_pack_id", null, (err, takenCategory) =>
+    blockCategory.findOne({is_deleted: false, _id: req.params.category_id}, "title svg", null, (err, takenCategory) =>
     {
         if (err) res.status(500).send(err)
         else if (!takenCategory) res.status(404).send({message: "not found!"})
