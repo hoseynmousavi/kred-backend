@@ -63,15 +63,11 @@ const getExchangeById = (req, res) =>
                 if (err) res.status(500).send(err)
                 else
                 {
-                    category.find(
-                        {_id: {$in: relations.reduce((sum, item) => [...sum, item.category_id], [])}},
-
-                        (err, categories) =>
-                        {
-                            if (err) res.status(500).send(err)
-                            else res.send({...exchangeJson, categories})
-                        },
-                    )
+                    category.find({_id: {$in: relations.reduce((sum, item) => [...sum, item.category_id], [])}}, (err, categories) =>
+                    {
+                        if (err) res.status(500).send(err)
+                        else res.send({...exchangeJson, categories})
+                    })
                 }
             })
         }

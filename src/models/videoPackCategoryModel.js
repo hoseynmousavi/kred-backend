@@ -10,8 +10,6 @@ const videoPackCategoryModel = new schema({
     },
     title: {
         type: String,
-        minlength: 1,
-        maxlength: 60,
         required: "Enter title!",
     },
     order: {
