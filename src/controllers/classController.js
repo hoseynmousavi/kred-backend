@@ -182,7 +182,7 @@ const getLessonCategories = (req, res) =>
             else
             {
                 let categoriesObject = categories.reduce((sum, category) => ({...sum, [category._id]: category.toJSON()}), {})
-                videoPackController.getVideoPacksFunc({condition: {_id: {$in: Object.values(categoriesObject).reduce((sum, cat) => [...sum, ...cat.video_pack_id], [])}}, fields: "title"})
+                videoPackController.getVideoPacksFunc({condition: {_id: {$in: Object.values(categoriesObject).reduce((sum, cat) => [...sum, ...cat.video_pack_id], [])}}})
                     .then(result =>
                     {
                         const packs = result.takenVideoPacks.reduce((sum, pack) => ({...sum, [pack._id]: pack.toJSON()}), {})
@@ -267,7 +267,7 @@ const getBlocks = (req, res) =>
         else
         {
             let blocksObject = blocks.reduce((sum, block) => ({...sum, [block._id]: block.toJSON()}), {})
-            videoPackController.getVideoPacksFunc({condition: {_id: {$in: Object.values(blocksObject).reduce((sum, cat) => [...sum, ...cat.video_pack_id], [])}}, fields: "title"})
+            videoPackController.getVideoPacksFunc({condition: {_id: {$in: Object.values(blocksObject).reduce((sum, cat) => [...sum, ...cat.video_pack_id], [])}}})
                 .then(result =>
                 {
                     const packs = result.takenVideoPacks.reduce((sum, pack) => ({...sum, [pack._id]: pack.toJSON()}), {})
@@ -277,7 +277,7 @@ const getBlocks = (req, res) =>
                         {
                             blocksObject[cat._id].videos = []
                             cat.video_pack_id.forEach(item =>
-                                blocksObject[cat._id].videos = [...blocksObject[cat._id].videos, packs[item._id]]
+                                blocksObject[cat._id].videos = [...blocksObject[cat._id].videos, packs[item._id]],
                             )
                             delete blocksObject[cat._id].video_pack_id
                         }
@@ -344,7 +344,7 @@ const getBlockCategories = (req, res) =>
             if (err) res.status(500).send(err)
             else
             {
-                videoPackController.getVideoPacksFunc({condition: {_id: {$in: Object.values(categoriesObject).reduce((sum, cat) => [...sum, ...cat.video_pack_id], [])}}, fields: "title"})
+                videoPackController.getVideoPacksFunc({condition: {_id: {$in: Object.values(categoriesObject).reduce((sum, cat) => [...sum, ...cat.video_pack_id], [])}}})
                     .then(result =>
                     {
                         const packs = result.takenVideoPacks.reduce((sum, pack) => ({...sum, [pack._id]: pack.toJSON()}), {})
