@@ -1,10 +1,8 @@
 import mongoose from "mongoose"
 
-const model = mongoose.Schema
+const schema = mongoose.Schema
 
-// const fields = [phone, phone_verified, password, role, email, email_verified, name, major, grade, entrance, birth_date, university, avatar, created_date]
-
-const userModel = new model({
+const userModel = new schema({
     phone: {
         type: String,
         unique: true,
