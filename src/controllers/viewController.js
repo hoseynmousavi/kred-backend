@@ -7,7 +7,7 @@ const view = mongoose.model("view", viewModel)
 const addView = (req, res) =>
 {
     delete req.body.created_date
-    const newView = new view({...req.body, user_id: req.headers.authorization ? req.headers.authorization._id : undefined})
+    const newView = new view({...req.body, user_agent: req.headers["user-agent"], user_id: req.headers.authorization ? req.headers.authorization._id : undefined})
     newView.save((err) =>
     {
         if (err) res.status(400).send(err)
@@ -178,6 +178,25 @@ const getAllSignUps = (req, res) =>
     else res.status(403).send()
 }
 
+const getTodayUserViews = (req, res) => // Didn't use in front
+{
+    if (req.headers.authorization.role === "admin")
+    {
+        const yesterday = new Date()
+        yesterday.setDate(yesterday.getDate() - 1)
+        view.aggregate([
+            {$match: {created_date: {$gte: yesterday}}},
+            {$group: {_id: "$user_id", count: {$sum: 1}}},
+            {$sort: {count: -1}},
+        ], (err, takenStats) =>
+        {
+            if (err) res.status(500).send(err)
+            else res.send(takenStats)
+        })
+    }
+    else res.status(403).send()
+}
+
 const viewController = {
     addView,
     getTodayPageViews,
@@ -186,6 +205,7 @@ const viewController = {
     getAllPageViews,
     getAllVideoViews,
     getAllSignUps,
+    getTodayUserViews,
 }
 
 export default viewController

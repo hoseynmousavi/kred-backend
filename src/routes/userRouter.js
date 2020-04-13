@@ -9,6 +9,9 @@ const userRouter = (app) =>
     app.route("/user/phone_check")
         .post(userController.phoneCheck)
 
+    app.route("/user/username_check")
+        .post(userController.usernameCheck)
+
     app.route("/user/login")
         .post(userController.userLogin)
 

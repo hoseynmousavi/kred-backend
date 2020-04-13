@@ -17,6 +17,15 @@ const userModel = new model({
         type: Boolean,
         default: true,
     },
+    username: {
+        type: String,
+        unique: true,
+        minlength: 3,
+        maxlength: 40,
+        index: true,
+        validate: /^[a-zA-Z]+[a-zA-Z0-9_.-]+$/,
+        required: "Enter phone!",
+    },
     password: {
         type: String,
         minlength: 6,

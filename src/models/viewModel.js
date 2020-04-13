@@ -14,6 +14,9 @@ const viewModel = new schema({
         required: "Enter type!",
         index: true,
     },
+    user_agent: {
+        type: String,
+    },
     content: {
         type: String,
         required: "Enter content!",

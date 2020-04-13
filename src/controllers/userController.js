@@ -44,6 +44,19 @@ const phoneCheck = (req, res) =>
     else res.status(400).send({message: "please don't send shit."})
 }
 
+const usernameCheck = (req, res) =>
+{
+    const username = req.body.username.toLowerCase().trim()
+    if (username.length > 2 && username.length < 41)
+        user.find({username}, {username: 1}, (err, users) =>
+        {
+            if (err) res.status(500).send(err)
+            else if (users) res.send({count: users.length})
+            else res.send({count: 0})
+        })
+    else res.status(400).send({message: "please don't send shit."})
+}
+
 const addNewUser = (req, res) =>
 {
     delete req.body.created_date
@@ -53,7 +66,7 @@ const addNewUser = (req, res) =>
     verificationCodeController.verifyCode({phone: req.body.phone, code: req.body.code})
         .then(() =>
         {
-            const newUser = new user(req.body)
+            const newUser = new user({...req.body, username: req.body.username && req.body.username.toLowerCase().trim()})
             newUser.save((err, createdUser) =>
             {
                 if (err) res.status(400).send(err)
@@ -78,7 +91,7 @@ const userLogin = (req, res) =>
     const phone = req.body.phone
     const password = req.body.password
 
-    user.findOne({$or: [{phone}, {email: phone}], password}, (err, takenUser) =>
+    user.findOne({$or: [{phone}, {email: phone}, {username: req.body.phone.toLowerCase().trim()}], password}, (err, takenUser) =>
     {
         if (err) res.status(400).send(err)
         else if (!takenUser) res.status(404).send({message: "user not found!"})
@@ -228,6 +241,7 @@ const userController = {
     userLogin,
     updateUserById,
     phoneCheck,
+    usernameCheck,
     getUsers,
     verifyToken,
     verifyTokenRoute,
