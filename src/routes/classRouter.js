@@ -45,6 +45,7 @@ const classRouter = (app) =>
         .delete(classController.deleteLike)
 
     app.route("/education-resource/save")
+        .get(classController.getSaves)
         .post(classController.addNewSave)
 
     app.route("/education-resource/save/:education_id")

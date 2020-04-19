@@ -25,7 +25,7 @@ const getLinkForPay = (req, res) =>
                     videoPackController.getPureVideoPackById({videoPackId: video_pack_id})
                         .then((result) =>
                         {
-                            if (code && result.videoPack.off_percent === 0)
+                            if (code)
                             {
                                 offCodeController.validateCodeFunc({code, user_id})
                                     .then((resultCode) =>

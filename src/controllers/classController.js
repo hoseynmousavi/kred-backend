@@ -894,6 +894,59 @@ const deleteComment = (req, res) =>
     })
 }
 
+const getSaves = (req, res) =>
+{
+    if (req.headers.authorization)
+    {
+        const user_id = req.headers.authorization._id
+        save.find({user_id}, (err, saves) =>
+        {
+            if (err) res.status(400).send(err)
+            else
+            {
+                const fields = "title likes_count comments_count is_many university pages_count teacher subject type lesson_category_id block_category_id lesson_id block_id file"
+                educationResource.find({is_deleted: false, _id: {$in: saves.reduce((sum, save) => [...sum, save.education_id], [])}}, fields, (err, educations) =>
+                {
+                    if (err) res.status(400).send(err)
+                    else
+                    {
+                        let haveLessonOrBlock = []
+                        let haveLessonCategory = []
+                        let haveBlockCategory = []
+                        educations.forEach(item =>
+                        {
+                            if (item.lesson_id || item.block_id) haveLessonOrBlock.push({...item.toJSON(), link: `/class/${item.lesson_id ? "lesson" : "block"}/${item.lesson_id || item.block_id}/resources/${item._id}`})
+                            else if (item.lesson_category_id) haveLessonCategory.push(item)
+                            else if (item.block_category_id) haveBlockCategory.push(item)
+                        })
+                        lessonCategory.find({is_deleted: false, _id: {$in: haveLessonCategory.reduce((sum, cat) => [...sum, cat.lesson_category_id], [])}}, (err, categories) =>
+                        {
+                            if (err) res.status(400).send(err)
+                            else
+                            {
+                                const categoriesObject = categories.reduce((sum, cat) => ({...sum, [cat._id]: cat}), {})
+                                haveLessonCategory = haveLessonCategory.reduce((sum, item) => [...sum, {...item.toJSON(), link: `/class/lesson/${categoriesObject[item.lesson_category_id].lesson_id}/${item.lesson_category_id}/resources/${item._id}`}], [])
+
+                                blockCategory.find({is_deleted: false, _id: {$in: haveBlockCategory.reduce((sum, cat) => [...sum, cat.block_category_id], [])}}, (err, categories) =>
+                                {
+                                    if (err) res.status(400).send(err)
+                                    else
+                                    {
+                                        const categoriesObject = categories.reduce((sum, cat) => ({...sum, [cat._id]: cat}), {})
+                                        haveBlockCategory = haveBlockCategory.reduce((sum, item) => [...sum, {...item.toJSON(), link: `/class/block/${categoriesObject[item.block_category_id].block_id}/${item.block_category_id}/resources/${item._id}`}], [])
+                                        res.send([...haveLessonOrBlock, ...haveLessonCategory, ...haveBlockCategory])
+                                    }
+                                })
+                            }
+                        })
+                    }
+                })
+            }
+        })
+    }
+    else res.status(401).send({message: "send token!"})
+}
+
 const addNewSave = (req, res) =>
 {
     delete req.body.created_date
@@ -960,6 +1013,7 @@ const classController = {
     addNewComment,
     getEducationComments,
     deleteComment,
+    getSaves,
     addNewSave,
     deleteSave,
 }
