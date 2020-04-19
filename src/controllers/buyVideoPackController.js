@@ -25,7 +25,7 @@ const getLinkForPay = (req, res) =>
                     videoPackController.getPureVideoPackById({videoPackId: video_pack_id})
                         .then((result) =>
                         {
-                            if (code)
+                            if (code && result.videoPack.off_percent === 0)
                             {
                                 offCodeController.validateCodeFunc({code, user_id})
                                     .then((resultCode) =>
@@ -41,7 +41,7 @@ const getLinkForPay = (req, res) =>
                                     })
                                     .catch((resultCode) => res.status(resultCode.status || 500).send(resultCode.err))
                             }
-                            else shopVideoPack({user_id, video_pack_id, price: result.videoPack.price, res})
+                            else shopVideoPack({user_id, video_pack_id, price: result.videoPack.off_percent !== 0 ? ((100 - result.videoPack.off_percent) / 100) * result.videoPack.price : result.videoPack.price, res})
                         })
                         .catch((err) => res.status(err.status || 500).send(err.err))
                 }

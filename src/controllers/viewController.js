@@ -25,6 +25,7 @@ const getTodayPageViews = (req, res) =>
             {
                 $match: {
                     type: "page",
+                    user_agent: {$not: new RegExp("bot")},
                     created_date: {$gte: yesterday},
                     user_id: {
                         $nin: [
@@ -56,6 +57,7 @@ const getTodayVideoViews = (req, res) =>
             {
                 $match: {
                     type: "video",
+                    user_agent: {$not: new RegExp("bot")},
                     created_date: {$gte: yesterday},
                     user_id: {
                         $nin: [
@@ -85,6 +87,7 @@ const getAllPageViews = (req, res) =>
             {
                 $match: {
                     type: "page",
+                    user_agent: {$not: new RegExp("bot")},
                     user_id: {
                         $nin: [
                             mongoose.Types.ObjectId("5da0cc1e8088bb5a41e40eff"), mongoose.Types.ObjectId("5da0e75a7d95bc0b30c492ca"),
@@ -113,6 +116,7 @@ const getAllVideoViews = (req, res) =>
             {
                 $match: {
                     type: "video",
+                    user_agent: {$not: new RegExp("bot")},
                     user_id: {
                         $nin: [
                             mongoose.Types.ObjectId("5da0cc1e8088bb5a41e40eff"), mongoose.Types.ObjectId("5da0e75a7d95bc0b30c492ca"),
