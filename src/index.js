@@ -60,8 +60,8 @@ offCodeRouter(app)
 mailRouter(app)
 notificationRouter(app)
 classRouter(app)
+siteMapRouter(app)
 fileRouter(app, __dirname)
-siteMapRouter(app, __dirname)
 notFoundRooter(app) // & at the end
 
 // Eventually Run The Server

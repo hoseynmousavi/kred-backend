@@ -28,7 +28,7 @@
     "express-fileupload": "^1.1.6",
     "jalali-date": "^1.1.0",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.9.6",
+    "mongoose": "^5.9.10",
     "nodemailer": "^6.4.6",
     "web-push": "^3.4.3"
   },

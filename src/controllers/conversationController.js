@@ -177,7 +177,8 @@ const updateConversation = (req, res) =>
                                 conversation.findOneAndUpdate(
                                     {_id: req.body.conversation_id},
                                     {...req.body, picture: `media/pictures/${picName}`, audio: `media/audios/${audioName}`},
-                                    {new: true, useFindAndModify: false, runValidators: true}, (err, updatedConversation) =>
+                                    {new: true, useFindAndModify: false, runValidators: true},
+                                    (err, updatedConversation) =>
                                     {
                                         if (err) res.status(400).send(err)
                                         else res.send(updatedConversation)
