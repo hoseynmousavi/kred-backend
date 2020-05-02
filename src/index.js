@@ -26,6 +26,7 @@ import fileRouter from "./routes/fileRouter"
 import notificationRouter from "./routes/notificationRouter"
 import classRouter from "./routes/classRouter"
 import siteMapRouter from "./routes/siteMapRouter"
+import videoDocumentRouter from "./routes/videoDocumentRouter"
 
 // Normal Things Never Leave Us Alone ...
 const app = express()
@@ -52,6 +53,7 @@ conversationRouter(app)
 viewRouter(app)
 videoPackRouter(app)
 videoRouter(app)
+videoDocumentRouter(app)
 companyRouter(app)
 videoPackCategoryRouter(app)
 buyVideoPackRouter(app)
