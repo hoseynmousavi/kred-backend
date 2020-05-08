@@ -152,10 +152,28 @@ const getAllSignUps = (req, res) =>
 {
     if (req.headers.authorization.role === "admin")
     {
+        const source = req.query.source
         const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
         const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
-        const options = {sort: "-created_date", skip, limit}
-        userController.getUsers({condition: null, options})
+        let options = {sort: "-created_date", skip, limit}
+
+        let condition = null
+        if (source === "email") condition = {email: {$exists: true}}
+        else if (source === "completed")
+        {
+            condition = {
+                email: {$exists: true},
+                name: {$exists: true},
+                major: {$exists: true},
+                grade: {$exists: true},
+                entrance: {$exists: true},
+                birth_date: {$exists: true},
+                university: {$exists: true},
+            }
+        }
+        else if (source === "view") options = null
+
+        userController.getUsers({condition, options})
             .then(result =>
             {
                 view.aggregate([
@@ -169,7 +187,7 @@ const getAllSignUps = (req, res) =>
                     {
                         if (skip === 0)
                         {
-                            userController.getUsersCount({condition: null})
+                            userController.getUsersCount({condition})
                                 .then((resultCount) => res.send({users: result.users, count: resultCount.users, stats: takenStats}))
                                 .catch(result => res.status(result.status).send(result.err))
                         }
