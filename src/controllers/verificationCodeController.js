@@ -17,7 +17,7 @@ const sendVerificationCode = (req, res) =>
             {
                 verificationCode.findOne({phone}, (err, takenCode) =>
                 {
-                    if (err) res.status(500).send(err)
+                    if (err) res.status(400).send(err)
                     else if (takenCode) res.send({message: "ok"})
                     else
                     {
