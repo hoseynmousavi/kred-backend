@@ -63,10 +63,36 @@ const addNewUser = (req, res) =>
     delete req.body.role
     delete req.body.email_verified
     delete req.body.phone_verified
-    verificationCodeController.verifyCode({phone: req.body.phone, code: req.body.code})
-        .then(() =>
+    const {phone, code, error, username} = req.body
+    if (phone && username)
+    {
+        if (code)
         {
-            const newUser = new user({...req.body, username: req.body.username && req.body.username.toLowerCase().trim()})
+            verificationCodeController.verifyCode({phone: req.body.phone, code: req.body.code})
+                .then(() =>
+                {
+                    const newUser = new user({...req.body, username: req.body.username.toLowerCase().trim()})
+                    newUser.save((err, createdUser) =>
+                    {
+                        if (err) res.status(400).send(err)
+                        else
+                        {
+                            const user = createdUser.toJSON()
+                            tokenHelper.encodeToken({_id: user._id, password: user.password})
+                                .then((token) =>
+                                {
+                                    delete user.password
+                                    res.send({...user, token})
+                                })
+                                .catch((err) => res.status(500).send({message: err}))
+                        }
+                    })
+                })
+                .catch(err => res.status(err.status || 500).send({message: err.err}))
+        }
+        else if (error)
+        {
+            const newUser = new user({...req.body, username: req.body.username.toLowerCase().trim(), phone_verified: false})
             newUser.save((err, createdUser) =>
             {
                 if (err) res.status(400).send(err)
@@ -82,8 +108,9 @@ const addNewUser = (req, res) =>
                         .catch((err) => res.status(500).send({message: err}))
                 }
             })
-        })
-        .catch(err => res.status(err.status || 500).send({message: err.err}))
+        }
+    }
+    else res.status(400).send({message: "send phone && username at least!"})
 }
 
 const userLogin = (req, res) =>
