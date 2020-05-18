@@ -20,6 +20,9 @@ const userRouter = (app) =>
 
     app.route("/user/forget-password")
         .post(userController.sendForgottenPassword)
+
+    app.route("/user/block")
+        .post(userController.addBlockedUser)
 }
 
 export default userRouter

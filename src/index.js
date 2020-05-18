@@ -27,6 +27,7 @@ import notificationRouter from "./routes/notificationRouter"
 import classRouter from "./routes/classRouter"
 import siteMapRouter from "./routes/siteMapRouter"
 import videoDocumentRouter from "./routes/videoDocumentRouter"
+import quizRouter from "./routes/quizRouter"
 
 // Normal Things Never Leave Us Alone ...
 const app = express()
@@ -63,6 +64,7 @@ mailRouter(app)
 notificationRouter(app)
 classRouter(app)
 siteMapRouter(app)
+quizRouter(app)
 fileRouter(app, __dirname)
 notFoundRooter(app) // & at the end
 

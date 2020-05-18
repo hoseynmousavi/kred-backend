@@ -4,8 +4,10 @@ import tokenHelper from "../functions/tokenHelper"
 import verificationCodeController from "./verificationCodeController"
 import axios from "axios"
 import data from "../data"
+import blackListModel from "../models/blackListModel"
 
 const user = mongoose.model("user", userModel)
+const blackList = mongoose.model("blackList", blackListModel)
 
 const getUsers = ({condition, projection, options}) =>
 {
@@ -263,6 +265,33 @@ const userExist = ({phone}) =>
     })
 }
 
+const isNotBlocked = ({phone}) =>
+{
+    return new Promise((resolve, reject) =>
+    {
+        blackList.findOne({phone}, (err, takenUser) =>
+        {
+            if (err) reject({status: 500, err})
+            else if (!takenUser) resolve()
+            else reject({status: 403, err: {message: "user found!"}})
+        })
+    })
+}
+
+const addBlockedUser = (req, res) =>
+{
+    if (req.headers.authorization.role === "admin")
+    {
+        const {phone} = req.body
+        new blackList({phone}).save((err, created) =>
+        {
+            if (err) res.status(400).send(err)
+            else res.send(created)
+        })
+    }
+    else res.status(400).send({message: "you are not admin babe! try harder :)))"})
+}
+
 const userController = {
     addNewUser,
     userLogin,
@@ -275,6 +304,8 @@ const userController = {
     sendForgottenPassword,
     getUsersCount,
     userExist,
+    isNotBlocked,
+    addBlockedUser,
 }
 
 export default userController
