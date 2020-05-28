@@ -32,6 +32,9 @@ const viewRouter = (app) =>
 
     app.route("/view/today/pack-users")
         .get(userVideoPackRelationController.getTodayUserVideoPack)
+
+    app.route("/view/users-diagram/:step")
+        .get(viewController.usersDiagram)
 }
 
 export default viewRouter

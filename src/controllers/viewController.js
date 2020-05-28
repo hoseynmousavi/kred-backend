@@ -1,6 +1,7 @@
 import mongoose from "mongoose"
 import viewModel from "../models/viewModel"
 import userController from "./userController"
+import numberCorrection from "../functions/numberCorrection"
 
 const view = mongoose.model("view", viewModel)
 
@@ -219,6 +220,29 @@ const getTodayUserViews = (req, res) => // Didn't use in front
     else res.status(403).send()
 }
 
+const usersDiagram = (req, res) =>
+{
+    const {step} = req.params
+    let stat = []
+    const date = {date: new Date("2019-10-11 18:38:22.743Z")}
+    getUserStat(stat, date, step, res)
+}
+
+const getUserStat = (stat, date, step, res) =>
+{
+    if (date.date < new Date())
+    {
+        userController.getUsersCount({condition: {created_date: {$lte: date.date}}})
+            .then(result =>
+            {
+                stat.push(numberCorrection(date.date.toLocaleDateString("fa-ir")) + ": " + result.users)
+                date.date.setDate(date.date.getDate() + parseInt(step))
+                getUserStat(stat, date, step, res)
+            })
+    }
+    else res.send(`<pre>${stat.reduce((sum, item) => sum + item + "\n", "")}</pre>`)
+}
+
 const viewController = {
     addView,
     getTodayPageViews,
@@ -228,6 +252,7 @@ const viewController = {
     getAllVideoViews,
     getAllSignUps,
     getTodayUserViews,
+    usersDiagram,
 }
 
 export default viewController
