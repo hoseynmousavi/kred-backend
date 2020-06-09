@@ -94,12 +94,32 @@ const addNewVideo = (req, res) =>
     else res.status(403).send({message: "you don't have permission babe!"})
 }
 
+const getAllVideos = (req, res) =>
+{
+    if (req.headers.authorization.role === "admin")
+    {
+        const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
+        const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
+        let query = {is_deleted: false}
+        if (req.query.searchTitle) query.title = new RegExp(req.query.searchTitle)
+        const fields = "title"
+        const options = {sort: "-created_date", skip, limit}
+        video.find(query, fields, options, (err, videos) =>
+        {
+            if (err) res.status(400).send(err)
+            else res.send(videos)
+        })
+    }
+    else res.status(403).send({message: "you don't have permission babe!"})
+}
+
 const videoController = {
     getVideos,
     addNewVideo,
     getVideoBySubtitleUrl,
     getFreeVideos,
     getVideosFunc,
+    getAllVideos,
 }
 
 export default videoController
