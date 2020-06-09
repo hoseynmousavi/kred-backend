@@ -101,7 +101,7 @@ const getAllVideos = (req, res) =>
         const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
         const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
         let query = {is_deleted: false}
-        if (req.query.searchTitle) query.title = new RegExp(req.query.searchTitle)
+        if (req.query.searchTitle) query.title = new RegExp(req.query.searchTitle, "i")
         const fields = "title"
         const options = {sort: "-created_date", skip, limit}
         video.find(query, fields, options, (err, videos) =>
