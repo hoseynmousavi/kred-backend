@@ -15,8 +15,8 @@ const getExchanges = (req, res) =>
     const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
     const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
     let query = {is_deleted: false, is_verified: true}
-    const options = {sort: "-created_date", skip, limit}
     const fields = "title price lined telegram whatsapp phone description picture thumbnail city_id user_id created_date"
+    const options = {sort: "-created_date", skip, limit}
 
     if (req.query.user_id) query.user_id = req.query.user_id
 

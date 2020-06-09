@@ -42,6 +42,23 @@ const getVideos = ({videoPackCategoryId}) =>
     })
 }
 
+const getVideosFunc = ({condition, fields, options}) =>
+{
+    return new Promise((resolve, reject) =>
+    {
+        video.find(
+            condition,
+            fields,
+            options,
+            (err, videos) =>
+            {
+                if (err) reject({status: 500, err})
+                else resolve({status: 200, videos})
+            },
+        )
+    })
+}
+
 const getVideoBySubtitleUrl = ({subtitleUrl}) =>
 {
     return new Promise((resolve, reject) =>
@@ -82,6 +99,7 @@ const videoController = {
     addNewVideo,
     getVideoBySubtitleUrl,
     getFreeVideos,
+    getVideosFunc,
 }
 
 export default videoController
