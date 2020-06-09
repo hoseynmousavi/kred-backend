@@ -51,7 +51,7 @@ const getVideoDocuments = (req, res) =>
 
 const addVideoDocument = (req, res) =>
 {
-    if (req.headers.authorization.role === "admin")
+    if (req.headers.authorization && req.headers.authorization.role === "admin")
     {
         const {video_id, type, description} = req.body
         const file = req.files ? req.files.file : null
@@ -71,7 +71,7 @@ const addVideoDocument = (req, res) =>
                                 newVideoDocument.save((err, created) =>
                                 {
                                     if (err) res.status(400).send(err)
-                                    else res.send({...created, video})
+                                    else res.send({...created.toJSON(), video})
                                 })
                             })
                             .catch((err) => res.status(400).send(err))
@@ -85,10 +85,25 @@ const addVideoDocument = (req, res) =>
     else res.status(403).send({message: "you don't have permission babe!"})
 }
 
+const deleteVideoDocument = (req, res) =>
+{
+    if (req.headers.authorization && req.headers.authorization.role === "admin")
+    {
+        const {video_id} = req.params
+        videoDocument.deleteOne({_id: video_id}, err =>
+        {
+            if (err) res.status(400).send(err)
+            else res.send({message: "ok"})
+        })
+    }
+    else res.status(403).send({message: "you don't have permission babe!"})
+}
+
 const videoDocumentController = {
     getVideoDocumentsByVideoId,
     addVideoDocument,
     getVideoDocuments,
+    deleteVideoDocument,
 }
 
 export default videoDocumentController

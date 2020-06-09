@@ -8,6 +8,7 @@ const videoDocumentRouter = (app) =>
 
     app.route("/video-document/:video_id")
         .get(videoDocumentController.getVideoDocumentsByVideoId)
+        .delete(videoDocumentController.deleteVideoDocument)
 }
 
 export default videoDocumentRouter
