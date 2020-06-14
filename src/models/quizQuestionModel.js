@@ -31,6 +31,9 @@ const quizQuestionModel = new schema({
         type: Number,
         required: "enter correct_answer!",
     },
+    picture: {
+        type: String,
+    },
     created_date: {
         type: Date,
         default: Date.now,

@@ -10,6 +10,7 @@ const quizRouter = (app) =>
         .post(quizController.addQuestion)
 
     app.route("/quiz/question/:question_id")
+        .patch(quizController.updateQuestion)
         .delete(quizController.removeQuestion)
 
     app.route("/quiz/:quiz_id")

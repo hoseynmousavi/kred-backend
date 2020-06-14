@@ -1,27 +1,29 @@
 import mongoose from "mongoose"
 import quizModel from "../models/quizModel"
 import quizQuestionModel from "../models/quizQuestionModel"
+import saveFile from "../functions/saveFile"
 
 const quiz = mongoose.model("quiz", quizModel)
 const question = mongoose.model("quizQuestion", quizQuestionModel)
 
 const getQuiz = (req, res) =>
 {
-    quiz.find(null, (err, quizes) =>
+    if (req.headers.authorization.role === "admin")
     {
-        if (err) res.status(400).send(err)
-        else
+        quiz.find(null, (err, quizes) =>
         {
-            question.find(null, (err, questions) =>
+            if (err) res.status(400).send(err)
+            else
             {
-                if (err) res.status(400).send(err)
-                else
+                question.find(null, (err, questions) =>
                 {
-                    res.send({quizes, questions})
-                }
-            })
-        }
-    })
+                    if (err) res.status(400).send(err)
+                    else res.send({quizes, questions})
+                })
+            }
+        })
+    }
+    else res.status(403).send({message: "you don't have permission babe!"})
 }
 
 const getQuizById = (req, res) =>
@@ -64,11 +66,18 @@ const addQuestion = (req, res) =>
 {
     if (req.headers.authorization.role === "admin")
     {
-        new question(req.body).save((err, created) =>
-        {
-            if (err) res.status(400).send(err)
-            else res.send(created)
-        })
+        const file = req.files ? req.files.picture : null
+        saveFile({file, folder: "pictures"})
+            .then(picture =>
+            {
+                const {quiz_id, title, first_answer, second_answer, third_answer, forth_answer, correct_answer} = req.body
+                new question({quiz_id, title, first_answer, second_answer, third_answer, forth_answer, correct_answer, picture}).save((err, created) =>
+                {
+                    if (err) res.status(400).send(err)
+                    else res.send(created)
+                })
+            })
+            .catch((err) => res.status(400).send(err))
     }
     else res.status(403).send({message: "you don't have permission babe!"})
 }
@@ -101,6 +110,16 @@ const removeQuestion = (req, res) =>
     else res.status(403).send({message: "you don't have permission babe!"})
 }
 
+const updateQuestion = (req, res) =>
+{
+    if (req.headers.authorization.role === "admin")
+    {
+        const {question_id} = req.params
+        res.send("wait")
+    }
+    else res.status(403).send({message: "you don't have permission babe!"})
+}
+
 const quizController = {
     getQuiz,
     getQuizById,
@@ -108,6 +127,7 @@ const quizController = {
     addQuestion,
     removeQuiz,
     removeQuestion,
+    updateQuestion,
 }
 
 export default quizController
