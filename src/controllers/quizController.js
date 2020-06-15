@@ -114,8 +114,36 @@ const updateQuestion = (req, res) =>
 {
     if (req.headers.authorization.role === "admin")
     {
-        const {question_id} = req.params
-        res.send("wait")
+        const file = req.files ? req.files.picture : null
+        if (file)
+        {
+            saveFile({file, folder: "pictures"})
+                .then(picture =>
+                {
+                    question.findOneAndUpdate(
+                        {_id: req.body.question_id},
+                        {...req.body, picture},
+                        {new: true, useFindAndModify: false, runValidators: true}, (err, updatedConversation) =>
+                        {
+                            if (err) res.status(400).send(err)
+                            else res.send(updatedConversation)
+                        },
+                    )
+                })
+                .catch((err) => res.status(400).send(err))
+        }
+        else
+        {
+            question.findOneAndUpdate(
+                {_id: req.body.question_id},
+                {...req.body},
+                {new: true, useFindAndModify: false, runValidators: true}, (err, updatedConversation) =>
+                {
+                    if (err) res.status(400).send(err)
+                    else res.send(updatedConversation)
+                },
+            )
+        }
     }
     else res.status(403).send({message: "you don't have permission babe!"})
 }

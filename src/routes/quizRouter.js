@@ -7,10 +7,10 @@ const quizRouter = (app) =>
         .post(quizController.addQuiz)
 
     app.route("/quiz/question")
+        .patch(quizController.updateQuestion)
         .post(quizController.addQuestion)
 
     app.route("/quiz/question/:question_id")
-        .patch(quizController.updateQuestion)
         .delete(quizController.removeQuestion)
 
     app.route("/quiz/:quiz_id")

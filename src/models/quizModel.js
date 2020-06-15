@@ -11,6 +11,9 @@ const quizModel = new schema({
         type: Number,
         required: "enter minutes!",
     },
+    count: {
+        type: Number,
+    },
     created_date: {
         type: Date,
         default: Date.now,
