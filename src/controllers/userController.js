@@ -70,7 +70,7 @@ const addNewUser = (req, res) =>
     {
         if (code)
         {
-            verificationCodeController.verifyCode({phone: req.body.phone, code: req.body.code})
+            verificationCodeController.verifyCode({phone, code})
                 .then(() =>
                 {
                     const newUser = new user({...req.body, username: req.body.username.toLowerCase().trim()})
@@ -86,7 +86,7 @@ const addNewUser = (req, res) =>
                                     delete user.password
                                     res.send({...user, token})
                                 })
-                                .catch((err) => res.status(500).send({message: err}))
+                                .catch(err => res.status(500).send({message: err}))
                         }
                     })
                 })
@@ -155,20 +155,7 @@ const verifyToken = ({_id, password}) =>
     })
 }
 
-const verifyTokenRoute = (req, res) =>
-{
-    const {_id} = req.headers.authorization
-    user.findById(_id, (err, takenUser) =>
-    {
-        if (err) res.status(500).send(err)
-        else
-        {
-            const user = takenUser.toJSON()
-            delete user.password
-            res.send({...user})
-        }
-    })
-}
+const verifyTokenRoute = (req, res) => res.send({...req.headers.authorization})
 
 const updateUserById = (req, res) =>
 {
@@ -201,7 +188,12 @@ const updateUserById = (req, res) =>
                             })
                             .catch((err) => res.status(500).send({message: err}))
                     }
-                    else res.send(updatedUser)
+                    else
+                    {
+                        const user = updatedUser.toJSON()
+                        delete user.password
+                        res.send({...user})
+                    }
                 }
             })
         })
@@ -224,7 +216,12 @@ const updateUserById = (req, res) =>
                         })
                         .catch((err) => res.status(500).send({message: err}))
                 }
-                else res.send(updatedUser)
+                else
+                {
+                    const user = updatedUser.toJSON()
+                    delete user.password
+                    res.send({...user})
+                }
             }
         })
     }
