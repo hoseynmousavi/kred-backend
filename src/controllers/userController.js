@@ -46,6 +46,19 @@ const phoneCheck = (req, res) =>
     else res.status(400).send({message: "please don't send shit."})
 }
 
+const emailCheck = (req, res) =>
+{
+    const {email} = req.body
+    if (email)
+        user.find({email}, {email: 1}, (err, users) =>
+        {
+            if (err) res.status(500).send(err)
+            else if (users) res.send({count: users.length})
+            else res.send({count: 0})
+        })
+    else res.status(400).send({message: "please don't send shit."})
+}
+
 const usernameCheck = (req, res) =>
 {
     const username = req.body.username.toLowerCase().trim()
@@ -65,15 +78,15 @@ const addNewUser = (req, res) =>
     delete req.body.role
     delete req.body.email_verified
     delete req.body.phone_verified
-    const {phone, code, error, username} = req.body
-    if (phone && username)
+    const {phone, code, error, username, email} = req.body
+    if (phone && username && email)
     {
         if (code)
         {
             verificationCodeController.verifyCode({phone, code})
                 .then(() =>
                 {
-                    const newUser = new user({...req.body, username: req.body.username.toLowerCase().trim()})
+                    const newUser = new user({...req.body, username: username.toLowerCase().trim(), email: email.toLowerCase().trim()})
                     newUser.save((err, createdUser) =>
                     {
                         if (err) res.status(400).send(err)
@@ -94,7 +107,7 @@ const addNewUser = (req, res) =>
         }
         else if (error)
         {
-            const newUser = new user({...req.body, username: req.body.username.toLowerCase().trim(), phone_verified: false})
+            const newUser = new user({...req.body, username: username.toLowerCase().trim(), email: email.toLowerCase().trim(), phone_verified: false})
             newUser.save((err, createdUser) =>
             {
                 if (err) res.status(400).send(err)
@@ -112,15 +125,13 @@ const addNewUser = (req, res) =>
             })
         }
     }
-    else res.status(400).send({message: "send phone && username at least!"})
+    else res.status(400).send({message: "send phone && username && email at least!"})
 }
 
 const userLogin = (req, res) =>
 {
-    const phone = req.body.phone
-    const password = req.body.password
-
-    user.findOne({$or: [{phone}, {email: phone}, {username: req.body.phone.toLowerCase().trim()}], password}, (err, takenUser) =>
+    const {phone, password} = req.body
+    user.findOne({$or: [{phone}, {email: phone}, {username: phone.toLowerCase().trim()}], password}, (err, takenUser) =>
     {
         if (err) res.status(400).send(err)
         else if (!takenUser) res.status(404).send({message: "user not found!"})
@@ -155,7 +166,12 @@ const verifyToken = ({_id, password}) =>
     })
 }
 
-const verifyTokenRoute = (req, res) => res.send({...req.headers.authorization})
+const verifyTokenRoute = (req, res) =>
+{
+    const user = {...req.headers.authorization}
+    delete user.password
+    res.send(user)
+}
 
 const updateUserById = (req, res) =>
 {
@@ -294,6 +310,7 @@ const userController = {
     userLogin,
     updateUserById,
     phoneCheck,
+    emailCheck,
     usernameCheck,
     getUsers,
     verifyToken,
