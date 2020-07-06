@@ -2,6 +2,7 @@ import mongoose from "mongoose"
 import viewModel from "../models/viewModel"
 import userController from "./userController"
 import numberCorrection from "../functions/numberCorrection"
+import JDate from "jalali-date"
 
 const view = mongoose.model("view", viewModel)
 
@@ -45,7 +46,7 @@ const getTodayPageViews = (req, res) =>
             else res.send({todayPagesCount})
         })
     }
-    else res.status(403).send()
+    else res.status(403).send({message: "you don't have permission babe!"})
 }
 
 const getTodayVideoViews = (req, res) =>
@@ -77,7 +78,7 @@ const getTodayVideoViews = (req, res) =>
             else res.send({todayVideosCount})
         })
     }
-    else res.status(403).send()
+    else res.status(403).send({message: "you don't have permission babe!"})
 }
 
 const getAllPageViews = (req, res) =>
@@ -106,7 +107,7 @@ const getAllPageViews = (req, res) =>
             else res.send(takenStats)
         })
     }
-    else res.status(403).send()
+    else res.status(403).send({message: "you don't have permission babe!"})
 }
 
 const getAllVideoViews = (req, res) =>
@@ -135,7 +136,7 @@ const getAllVideoViews = (req, res) =>
             else res.send(takenStats)
         })
     }
-    else res.status(403).send()
+    else res.status(403).send({message: "you don't have permission babe!"})
 }
 
 const getTodaySignUps = (req, res) =>
@@ -146,7 +147,7 @@ const getTodaySignUps = (req, res) =>
             .then(result => res.send({todaySignUp: result.users, todaySignUpCount: result.users.length}))
             .catch(result => res.status(result.status).send(result.err))
     }
-    else res.status(403).send()
+    else res.status(403).send({message: "you don't have permission babe!"})
 }
 
 const getAllSignUps = (req, res) =>
@@ -198,7 +199,7 @@ const getAllSignUps = (req, res) =>
             })
             .catch(result => res.status(result.status).send(result.err))
     }
-    else res.status(403).send()
+    else res.status(403).send({message: "you don't have permission babe!"})
 }
 
 const getTodayUserViews = (req, res) => // Didn't use in front
@@ -217,15 +218,19 @@ const getTodayUserViews = (req, res) => // Didn't use in front
             else res.send(takenStats)
         })
     }
-    else res.status(403).send()
+    else res.status(403).send({message: "you don't have permission babe!"})
 }
 
 const usersDiagram = (req, res) =>
 {
-    const {step} = req.params
-    let stat = []
-    const date = {date: new Date("2019-10-11 18:38:22.743Z")}
-    getUserStat(stat, date, step, res)
+    if (req.headers.authorization.role === "admin")
+    {
+        const {step} = req.params
+        let stat = []
+        const date = {date: new Date("2019-10-11 18:38:22.743Z")}
+        getUserStat(stat, date, step, res)
+    }
+    else res.status(403).send({message: "you don't have permission babe!"})
 }
 
 const getUserStat = (stat, date, step, res) =>
@@ -243,6 +248,53 @@ const getUserStat = (stat, date, step, res) =>
     else res.send(`<pre>${stat.reduce((sum, item) => sum + item + "\n", "")}</pre>`)
 }
 
+const viewDailyDiagram = (req, res) =>
+{
+    if (req.headers.authorization.role === "admin")
+    {
+        const today = new Date()
+        today.setDate(today.getDate() - 30)
+        const geoDate = numberCorrection(today.toLocaleDateString("fa-ir")).split("/")
+        const year = parseInt(geoDate[0])
+        const month = parseInt(geoDate[1])
+        const day = parseInt(geoDate[2])
+        const date = {date: JDate.toGregorian(year, month, day)}
+        let stat = []
+        getViewDailyStat(stat, date, res)
+    }
+    else res.status(403).send({message: "you don't have permission babe!"})
+}
+
+const getViewDailyStat = (stat, date, res) =>
+{
+    if (date.date < new Date())
+    {
+        let tomorrow = new Date(date.date)
+        tomorrow.setDate(tomorrow.getDate() + 1)
+        view.countDocuments({
+            user_agent: {$not: new RegExp("bot")},
+            created_date: {$gte: date.date, $lt: tomorrow},
+            user_id: {
+                $nin: [
+                    mongoose.Types.ObjectId("5da0cc1e8088bb5a41e40eff"), mongoose.Types.ObjectId("5da0e75a7d95bc0b30c492ca"),
+                    mongoose.Types.ObjectId("5da0e8d67d95bc0b30c492cb"), mongoose.Types.ObjectId("5e430d93dec1c036332cf926"),
+                    mongoose.Types.ObjectId("5da2eec47d95bc0b30c492cf"), mongoose.Types.ObjectId("5dc2ac8955a4e622fe895a92"),
+                ],
+            },
+        }, (err, takenStats) =>
+        {
+            if (err) res.status(500).send(err)
+            else
+            {
+                stat.push({name: date.date.toLocaleDateString("fa-ir"), "بازدید": takenStats})
+                date.date.setDate(date.date.getDate() + 1)
+                getViewDailyStat(stat, date, res)
+            }
+        })
+    }
+    else res.send(stat)
+}
+
 const viewController = {
     addView,
     getTodayPageViews,
@@ -253,6 +305,7 @@ const viewController = {
     getAllSignUps,
     getTodayUserViews,
     usersDiagram,
+    viewDailyDiagram,
 }
 
 export default viewController

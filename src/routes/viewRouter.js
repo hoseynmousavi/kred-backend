@@ -35,6 +35,9 @@ const viewRouter = (app) =>
 
     app.route("/view/users-diagram/:step")
         .get(viewController.usersDiagram)
+
+    app.route("/view/view-diagram")
+        .get(viewController.viewDailyDiagram)
 }
 
 export default viewRouter
