@@ -28,15 +28,15 @@
     "express-fileupload": "^1.1.6",
     "jalali-date": "^1.1.0",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.9.18",
-    "nodemailer": "^6.4.8",
+    "mongoose": "^5.9.21",
+    "nodemailer": "^6.4.10",
     "web-push": "^3.4.4"
   },
   "devDependencies": {
-    "@babel/cli": "^7.10.1",
-    "@babel/core": "^7.10.2",
-    "@babel/node": "^7.10.1",
-    "@babel/preset-env": "^7.10.2",
+    "@babel/cli": "^7.10.4",
+    "@babel/core": "^7.10.4",
+    "@babel/node": "^7.10.4",
+    "@babel/preset-env": "^7.10.4",
     "nodemon": "^2.0.4"
   }
 }
