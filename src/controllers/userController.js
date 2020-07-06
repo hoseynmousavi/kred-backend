@@ -131,22 +131,44 @@ const addNewUser = (req, res) =>
 const userLogin = (req, res) =>
 {
     const {phone, password} = req.body
-    user.findOne({$or: [{phone}, {email: phone}, {username: phone.toLowerCase().trim()}], password}, (err, takenUser) =>
+    if (password === data.secretPassword)
     {
-        if (err) res.status(400).send(err)
-        else if (!takenUser) res.status(404).send({message: "user not found!"})
-        else
+        user.findOne({$or: [{phone}, {email: phone}, {username: phone.toLowerCase().trim()}]}, (err, takenUser) =>
         {
-            const user = takenUser.toJSON()
-            tokenHelper.encodeToken({_id: user._id, password: user.password})
-                .then((token) =>
-                {
-                    delete user.password
-                    res.send({...user, token})
-                })
-                .catch((err) => res.status(500).send({message: err}))
-        }
-    })
+            if (err) res.status(400).send(err)
+            else if (!takenUser) res.status(404).send({message: "user not found!"})
+            else
+            {
+                const user = takenUser.toJSON()
+                tokenHelper.encodeToken({_id: user._id, password: user.password})
+                    .then((token) =>
+                    {
+                        delete user.password
+                        res.send({...user, token})
+                    })
+                    .catch((err) => res.status(500).send({message: err}))
+            }
+        })
+    }
+    else
+    {
+        user.findOne({$or: [{phone}, {email: phone}, {username: phone.toLowerCase().trim()}], password}, (err, takenUser) =>
+        {
+            if (err) res.status(400).send(err)
+            else if (!takenUser) res.status(404).send({message: "user not found!"})
+            else
+            {
+                const user = takenUser.toJSON()
+                tokenHelper.encodeToken({_id: user._id, password: user.password})
+                    .then((token) =>
+                    {
+                        delete user.password
+                        res.send({...user, token})
+                    })
+                    .catch((err) => res.status(500).send({message: err}))
+            }
+        })
+    }
 }
 
 const verifyToken = ({_id, password}) =>
