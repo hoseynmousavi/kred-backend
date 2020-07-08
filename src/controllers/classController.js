@@ -763,7 +763,7 @@ const addNewComment = (req, res) =>
                                                     notificationController.sendNotification({
                                                         user_id: user._id,
                                                         title: `${req.headers.authorization.name} پاسخ کامنت شما را داده است!`,
-                                                        image: data.restful_url + req.headers.authorization.avatar,
+                                                        image: req.headers.authorization.avatar ? data.restful_url + req.headers.authorization.avatar : undefined,
                                                         icon: data.domain_url + "/logo192.png",
                                                         url: data.domain_url +
                                                             `/class/lesson/${updatedEducation.lesson_category_id || updatedEducation.block_category_id || updatedEducation.lesson_id || updatedEducation.block_id}/resources/` +

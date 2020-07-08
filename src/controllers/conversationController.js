@@ -366,7 +366,7 @@ const addNewComment = (req, res) =>
                         {
                             comment.findById(createdComment.reply_comment_id, (err, takenComment) =>
                             {
-                                if (err) console.log("shit")
+                                if (err) console.log(err)
                                 else
                                 {
                                     userController.getUsers({condition: {_id: takenComment.user_id}})
@@ -380,7 +380,7 @@ const addNewComment = (req, res) =>
                                                     notificationController.sendNotification({
                                                         user_id: user._id,
                                                         title: `${req.headers.authorization.name} پاسخ کامنت شما را داده است!`,
-                                                        image: data.restful_url + req.headers.authorization.avatar,
+                                                        image: req.headers.authorization.avatar ? data.restful_url + req.headers.authorization.avatar : undefined,
                                                         icon: data.domain_url + "/logo192.png",
                                                         url: data.domain_url + "/pavilions/" + req.body.conversation_id + "/comments",
                                                         body: createdComment.description,
