@@ -22,7 +22,7 @@ const notificationMessageModel = new schema({
     },
     icon: {
         type: String,
-        default: "/logo192.png",
+        default: "/media/pictures/logo192.png",
     },
     image: {
         type: String,
