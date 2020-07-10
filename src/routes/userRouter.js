@@ -3,6 +3,7 @@ import userController from "../controllers/userController"
 const userRouter = (app) =>
 {
     app.route("/user")
+        .get(userController.getUsersForAdmins)
         .post(userController.addNewUser)
         .patch(userController.updateUserById)
 

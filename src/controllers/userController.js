@@ -9,6 +9,28 @@ import blackListModel from "../models/blackListModel"
 const user = mongoose.model("user", userModel)
 const blackList = mongoose.model("blackList", blackListModel)
 
+const getUsersForAdmins = (req, res) =>
+{
+    if (req.headers.authorization.role === "admin")
+    {
+        const limit = parseInt(req.query.limit) > 0 ? parseInt(req.query.limit) : 9
+        const skip = (req.query.page - 1 > 0 ? req.query.page - 1 : 0) * limit
+        let query = {}
+        const fields = "phone name"
+        const options = {sort: "-created_date", skip, limit}
+
+        const {search} = req.query
+        if (search) query = {$or: [{name: new RegExp(search)}, {email: new RegExp(search)}, {phone: new RegExp(search)}, {username: new RegExp(search.toLowerCase().trim())}]}
+
+        user.find(query, fields, options, (err, takenUsers) =>
+        {
+            if (err) res.status(400).send(err)
+            else res.send(takenUsers)
+        })
+    }
+    else res.status(403).send({message: "you don't have permission babe!"})
+}
+
 const getUsers = ({condition, projection, options}) =>
 {
     return new Promise((resolve, reject) =>
@@ -346,6 +368,7 @@ const userController = {
     userExist,
     isNotBlocked,
     addBlockedUser,
+    getUsersForAdmins,
 }
 
 export default userController

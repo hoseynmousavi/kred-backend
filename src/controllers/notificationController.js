@@ -69,7 +69,7 @@ const sendNotificationForAdmins = (req, res) =>
                 saveFile({file: image, folder: "pictures"})
                     .then(image =>
                     {
-                        const newNotificationMessage = new notificationMessage({sender_id, users_id, title, body, icon, image, tag, url, requireInteraction, renotify})
+                        const newNotificationMessage = new notificationMessage({sender_id, users_id: users_id ? JSON.parse(users_id) : undefined, title, body, icon, image, tag, url, requireInteraction, renotify})
                         newNotificationMessage.save((err, created) =>
                         {
                             if (err) res.status(400).send(err)
