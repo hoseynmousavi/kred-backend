@@ -24,6 +24,10 @@ const notificationMessageModel = new schema({
         type: String,
         default: "/media/pictures/logo192.png",
     },
+    badge: {
+        type: String,
+        default: "/media/pictures/logo192.png",
+    },
     image: {
         type: String,
     },

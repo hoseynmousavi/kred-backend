@@ -44,7 +44,7 @@ const sendNotification = ({user_id, title, icon, body, image, tag, url, requireI
                 {
                     webPush.sendNotification(
                         JSON.parse(notif.toJSON().token),
-                        JSON.stringify({title, icon: icon || data.domain_url + "/logo192.png", body, image, tag, url, requireInteraction, renotify}),
+                        JSON.stringify({title, badge: data.domain_url + "/logo192.png", icon: icon || data.domain_url + "/logo192.png", body, image, tag, url, requireInteraction, renotify}),
                     )
                         .catch(err => console.log("notification", err))
                 })
@@ -75,7 +75,7 @@ const sendNotificationForAdmins = (req, res) =>
                             if (err) res.status(400).send(err)
                             else
                             {
-                                const {users_id, title, body, icon, image, tag, url, requireInteraction, renotify} = created
+                                const {users_id, title, body, icon, badge, image, tag, url, requireInteraction, renotify} = created
                                 notification.find(users_id ? {user_id: {$in: users_id}} : null, (err, tokens) =>
                                 {
                                     if (err) res.status(400).send(err)
@@ -85,7 +85,7 @@ const sendNotificationForAdmins = (req, res) =>
                                         {
                                             webPush.sendNotification(
                                                 JSON.parse(notif.toJSON().token),
-                                                JSON.stringify({title, icon: data.restful_url + icon, body, image: data.restful_url + image, tag, url, requireInteraction, renotify}),
+                                                JSON.stringify({title, icon: data.restful_url + icon, badge: data.restful_url + badge, body, image: data.restful_url + image, tag, url, requireInteraction, renotify}),
                                             )
                                                 .catch(err => console.log("notification err:", err))
                                         })
