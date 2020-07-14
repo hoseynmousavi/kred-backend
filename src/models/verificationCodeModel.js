@@ -9,7 +9,6 @@ const verificationCodeModel = new schema({
     },
     phone: {
         type: String,
-        unique: true,
         minlength: 11,
         maxlength: 11,
         required: "Enter Phone!",

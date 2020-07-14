@@ -18,10 +18,10 @@ const sendVerificationCode = (req, res) =>
                     .then(() => res.status(400).send({message: "user exist!"}))
                     .catch(() =>
                     {
-                        verificationCode.findOne({phone}, (err, takenCode) =>
+                        verificationCode.find({phone}, (err, takenCodes) =>
                         {
                             if (err) res.status(400).send(err)
-                            else if (takenCode) res.send({message: "ok"})
+                            else if (takenCodes && takenCodes.length >= 3) res.status(400).send({message: "you get it many time!"})
                             else
                             {
                                 const code = Math.floor(Math.random() * 8999) + 1000
@@ -61,7 +61,7 @@ const verifyCode = ({phone, code}) =>
                 else if (takenCode)
                 {
                     resolve({status: 200})
-                    verificationCode.deleteOne({phone, code}, (err) => console.log(err ? err : "deleted code successfully."))
+                    verificationCode.remove({phone, code}, (err) => console.log(err ? err : "deleted code successfully."))
                 }
                 else reject({status: 404, err: "code verification failed!"})
             })
