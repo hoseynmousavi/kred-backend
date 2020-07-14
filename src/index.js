@@ -1,6 +1,5 @@
 import cors from "cors"
 import express from "express"
-import bodyParser from "body-parser"
 import fileUpload from "express-fileupload"
 import mongoose from "mongoose"
 import rootRouter from "./routes/rootRouter"
@@ -33,8 +32,8 @@ import quizRouter from "./routes/quizRouter"
 const app = express()
 app.use(cors())
 app.use(fileUpload({createParentPath: true}))
-app.use(bodyParser.urlencoded({extended: true}))
-app.use(bodyParser.json())
+app.use(express.json())
+app.use(express.urlencoded({extended: false}))
 
 // Connecting To DB (data file is private babes 😊)
 mongoose.Promise = global.Promise
