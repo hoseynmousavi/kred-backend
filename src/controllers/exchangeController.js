@@ -8,7 +8,7 @@ const exchange = mongoose.model("exchange", exchangeModel)
 const exchangeCategory = mongoose.model("exchangeCategory", exchangeCategoryRelationModel)
 const category = mongoose.model("category", categoryModel)
 
-const getExchangesDistinct = () => exchange.distinct("_id")
+const getExchangesDistinct = () => exchange.distinct("_id", {is_deleted: false})
 
 const getExchanges = (req, res) =>
 {

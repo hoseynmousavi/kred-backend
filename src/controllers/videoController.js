@@ -79,7 +79,6 @@ const addNewVideo = (req, res) =>
         delete req.body.created_date
         delete req.body.is_deleted
         delete req.body.user_id
-        delete req.body.is_free
         const newVideo = new video({...req.body, user_id: req.headers.authorization._id})
         newVideo.save((err, createdVideo) =>
         {
