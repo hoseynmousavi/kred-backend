@@ -3,6 +3,8 @@ import exchangeModel from "../models/exchangeModel"
 import exchangeCategoryRelationModel from "../models/exchangeCategoryRelationModel"
 import mailHelper from "../functions/mailHelper"
 import categoryModel from "../models/categoryModel"
+import data from "../data"
+import notificationController from "./notificationController"
 
 const exchange = mongoose.model("exchange", exchangeModel)
 const exchangeCategory = mongoose.model("exchangeCategory", exchangeCategoryRelationModel)
@@ -114,13 +116,23 @@ const addNewExchange = (req, res) =>
                                 const mails = ["aidin.sh1377@gmail.com", "miri1888@gmail.com", "erfanv1@gmail.com", "eziaie1998@gmail.com", "zmahramian@gmail.com", "hoseyn.mousavi78@gmail.com"]
                                 for (let i = 0; i < mails.length; i++)
                                 {
-                                    setTimeout(() =>
-                                            mailHelper.sendMail({
-                                                subject: "آگهی جدید داریم!",
-                                                text: `آگهی جدید : ${createdExchange.title}`,
-                                                receivers: mails[i],
-                                            })
-                                        , i * 5000)
+                                    for (let i = 0; i < data.adminIds.length; i++)
+                                    {
+                                        setTimeout(() =>
+                                            {
+                                                notificationController.sendNotification({
+                                                    user_id: data.adminIds[i],
+                                                    title: `ادمین! ${req.headers.authorization.name || req.headers.authorization.phone} برامون آگهی تبادل گذاشته!`,
+                                                    icon: data.domain_url + "/logo192.png",
+                                                    url: data.domain_url + "/exchanges/" + createdExchange._id,
+                                                    body: "به سیّد بگید تاییدش کنه!",
+                                                    tag: createdExchange._id.toString() + "admin",
+                                                    requireInteraction: true,
+                                                    renotify: true,
+                                                })
+                                            }
+                                            , i * 1000)
+                                    }
                                 }
                             }
                         }
