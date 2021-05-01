@@ -245,7 +245,15 @@ const getUserStat = (stat, date, step, res) =>
                 getUserStat(stat, date, step, res)
             })
     }
-    else res.send(stat)
+    else
+    {
+        userController.getUsersCount({condition: {created_date: {$lte: date.date}}})
+            .then(result =>
+            {
+                stat.push({name: numberCorrection(date.date.toLocaleDateString("fa-ir")), "ثبت نام": result.users})
+                res.send(stat)
+            })
+    }
 }
 
 const viewDailyDiagram = (req, res) =>
