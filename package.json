@@ -21,21 +21,21 @@
   },
   "homepage": "https://github.com/hoseynmousavi/kred-backend#readme",
   "dependencies": {
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "express-fileupload": "^1.1.6",
+    "express-fileupload": "^1.2.1",
     "jalali-date": "^1.1.0",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.9.21",
-    "nodemailer": "^6.4.10",
+    "mongoose": "^5.12.7",
+    "nodemailer": "^6.6.0",
     "web-push": "^3.4.4"
   },
   "devDependencies": {
-    "@babel/cli": "^7.10.4",
-    "@babel/core": "^7.10.4",
-    "@babel/node": "^7.10.4",
-    "@babel/preset-env": "^7.10.4",
-    "nodemon": "^2.0.4"
+    "@babel/cli": "^7.12.13",
+    "@babel/core": "^7.12.13",
+    "@babel/node": "^7.12.13",
+    "@babel/preset-env": "^7.12.13",
+    "nodemon": "^2.0.7"
   }
 }

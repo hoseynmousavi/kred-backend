@@ -240,12 +240,12 @@ const getUserStat = (stat, date, step, res) =>
         userController.getUsersCount({condition: {created_date: {$lte: date.date}}})
             .then(result =>
             {
-                stat.push(numberCorrection(date.date.toLocaleDateString("fa-ir")) + ": " + result.users)
+                stat.push({name: numberCorrection(date.date.toLocaleDateString("fa-ir")), "ثبت نام": result.users})
                 date.date.setDate(date.date.getDate() + parseInt(step))
                 getUserStat(stat, date, step, res)
             })
     }
-    else res.send(`<pre>${stat.reduce((sum, item) => sum + item + "\n", "")}</pre>`)
+    else res.send(stat)
 }
 
 const viewDailyDiagram = (req, res) =>
